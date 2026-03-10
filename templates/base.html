@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Device Management</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    {% block header %}{%endblock %}
+    <style>
+      body {
+        background: #eef2f7;
+        font-family: Arial;
+      }
+
+      /* SIDEBAR */
+      .sidebar {
+        height: 100vh;
+        width: 260px;
+        position: fixed;
+        background: #0b3d91;
+        color: white;
+        transition: 0.3s;
+        overflow-y: auto;
+        z-index: 1050;
+        box-shadow: 4px 0px 20px rgba(0, 0, 0, 0.25);
+      }
+
+      /* SIDEBAR HEADER */
+      .sidebar-header {
+        padding: 25px 20px;
+        background: #072d6b;
+        text-align: center;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+      }
+
+      .sidebar-header h4 {
+        margin: 0;
+        font-weight: bold;
+      }
+
+      .sidebar-header small {
+        opacity: 0.8;
+        font-size: 12px;
+      }
+
+      /* SECTION TITLE */
+      .sidebar-title {
+        padding: 12px 20px;
+        font-size: 12px;
+        letter-spacing: 1px;
+        opacity: 0.7;
+      }
+
+      /* MENU */
+      .sidebar a {
+        display: block;
+        color: white;
+        padding: 13px 20px;
+        text-decoration: none;
+        font-size: 15px;
+      }
+
+      .sidebar a:hover {
+        background: #072d6b;
+      }
+
+      .sidebar i {
+        width: 22px;
+      }
+
+      /* SUBMENU */
+      .submenu {
+        display: none;
+        background: #072d6b;
+      }
+
+      .submenu a {
+        padding-left: 50px;
+        font-size: 14px;
+      }
+
+      /* MAIN */
+      .main {
+        margin-left: 260px;
+        padding: 20px;
+      }
+
+      /* TOPBAR */
+      .topbar {
+        background: white;
+        padding: 12px 20px;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      /* CARD */
+      .card-stat {
+        border: none;
+        border-radius: 12px;
+        color: white;
+      }
+
+      .card-blue {
+        background: #0b3d91;
+      }
+
+      .card-green {
+        background: #2e8b57;
+      }
+
+      .card-orange {
+        background: #f39c12;
+      }
+
+      /* TABLE */
+      .table thead {
+        background: #0b3d91;
+        color: white;
+      }
+
+      /* OVERLAY */
+      .overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.4);
+        display: none;
+        z-index: 1040;
+      }
+
+      .overlay.active {
+        display: block;
+      }
+
+      /* MOBILE */
+      @media(max-width:768px) {
+        .sidebar {
+          left: -260px;
+        }
+
+        .sidebar.active {
+          left: 0;
+        }
+
+        .main {
+          margin-left: 0;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- SIDEBAR -->
+    <div class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <h4>
+          <i class="fa fa-server"></i> NetDevice
+        </h4>
+        <small>Device Management System</small>
+      </div>
+      <div class="sidebar-title"> MAIN MENU </div>
+      <a href="#">
+        <i class="fa fa-dashboard"></i> Dashboard </a>
+      <a href="#" class="menu-toggle">
+        <i class="fa fa-desktop"></i> Devices <span class="float-end">
+          <i class="fa fa-caret-down"></i>
+        </span>
+      </a>
+      <div class="submenu">
+        <a href="#">
+          <i class="fa fa-list"></i> Device List </a>
+        <a href="#">
+          <i class="fa fa-plus-circle"></i> Add Device </a>
+        <a href="#">
+          <i class="fa fa-tags"></i> Device Type </a>
+      </div>
+      <div class="sidebar-title"> NETWORK </div>
+      <a href="#" class="menu-toggle">
+        <i class="fa fa-sitemap"></i> Network <span class="float-end">
+          <i class="fa fa-caret-down"></i>
+        </span>
+      </a>
+      <div class="submenu">
+        <a href="#">
+          <i class="fa fa-share-alt"></i> Topology </a>
+        <a href="#">
+          <i class="fa fa-globe"></i> IP Management </a>
+      </div>
+      <a href="#" class="menu-toggle">
+        <i class="fa fa-bar-chart"></i> Monitoring <span class="float-end">
+          <i class="fa fa-caret-down"></i>
+        </span>
+      </a>
+      <div class="submenu">
+        <a href="#">
+          <i class="fa fa-heartbeat"></i> Device Status </a>
+        <a href="#">
+          <i class="fa fa-file-text"></i> Logs </a>
+      </div>
+      <div class="sidebar-title"> SYSTEM </div>
+      <a href="#">
+        <i class="fa fa-cog"></i> Settings </a>
+      <a href="#">
+        <i class="fa fa-user"></i> Users </a>
+      <a href="#">
+        <i class="fa fa-sign-out"></i> Logout </a>
+    </div>
+    <!-- OVERLAY -->
+    <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+    <!-- MAIN -->
+    <div class="main">
+      <!-- TOPBAR -->
+      <div class="topbar mb-4 d-flex justify-content-between align-items-center">
+        <button class="btn btn-outline-primary d-md-none" onclick="toggleSidebar()">
+          <i class="fa fa-bars"></i>
+        </button>
+        <h5 class="mb-0">
+          <i class="fa fa-dashboard"></i> {{menu}}
+        </h5>
+        <div class="d-none d-xxl-block d-xl-block d-lg-block">
+          <i class="fa fa-user-circle"></i> {{user.userprofile.nama_lengkap|truncatechars:15}}
+        </div>
+      </div>
+      {% block contents %}
+        {% include 'views/dashboard.html'%}
+      {% endblock %}
+    </div>
+    <!-- SCRIPT -->
+    <script>
+      function toggleSidebar() {
+        let sidebar = document.getElementById("sidebar")
+        let overlay = document.getElementById("overlay")
+        sidebar.classList.toggle("active")
+        overlay.classList.toggle("active")
+      }
+      document.querySelectorAll(".menu-toggle").forEach(menu => {
+        menu.addEventListener("click", function(e) {
+          e.preventDefault()
+          let submenu = this.nextElementSibling
+          if (submenu.style.display === "block") {
+            submenu.style.display = "none"
+          } else {
+            submenu.style.display = "block"
+          }
+        })
+      })
+    </script>
+  </body>
+</html>

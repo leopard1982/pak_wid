@@ -5,3 +5,4 @@ mydevice/migrations/__pycache__
 management_device/settings.py
 .venv
 db.sqlite3
+.venv-1

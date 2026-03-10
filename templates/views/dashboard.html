@@ -1,0 +1,89 @@
+<!-- CARDS -->
+<div class="row mb-4">
+    <div class="col-md-4 mb-3">
+        <div class="card card-stat card-blue p-3">
+        <h6>
+            <i class="fa fa-desktop"></i> Total Devices
+        </h6>
+        <h3>120</h3>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="card card-stat card-green p-3">
+        <h6>
+            <i class="fa fa-check-circle"></i> Online
+        </h6>
+        <h3>98</h3>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="card card-stat card-orange p-3">
+        <h6>
+            <i class="fa fa-times-circle"></i> Offline
+        </h6>
+        <h3>22</h3>
+        </div>
+    </div>
+    </div>
+    <!-- DEVICE TABLE -->
+    <div class="card shadow-sm">
+    <div class="card-header d-flex justify-content-between">
+        <h6 class="mb-0">
+        <i class="fa fa-list"></i> Device List
+        </h6>
+        <button class="btn btn-primary btn-sm">
+        <i class="fa fa-plus"></i> Add Device </button>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Device</th>
+                <th>IP Address</th>
+                <th>Status</th>
+                <th>Location</th>
+                <th>Action</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>1</td>
+                <td>Router Core</td>
+                <td>192.168.1.1</td>
+                <td>
+                <span class="badge bg-success">Online</span>
+                </td>
+                <td>Server Room</td>
+                <td>
+                <button class="btn btn-warning btn-sm">
+                    <i class="fa fa-edit"></i>
+                </button>
+                <button class="btn btn-danger btn-sm">
+                    <i class="fa fa-trash"></i>
+                </button>
+                </td>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td>Switch Lantai 2</td>
+                <td>192.168.1.10</td>
+                <td>
+                <span class="badge bg-danger">Offline</span>
+                </td>
+                <td>Lantai 2</td>
+                <td>
+                <button class="btn btn-warning btn-sm">
+                    <i class="fa fa-edit"></i>
+                </button>
+                <button class="btn btn-danger btn-sm">
+                    <i class="fa fa-trash"></i>
+                </button>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+        </div>
+    </div>
+</div>

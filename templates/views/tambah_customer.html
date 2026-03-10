@@ -1,0 +1,81 @@
+{% extends 'base.html'%}
+
+{% block header %}
+<style>
+  body {
+    background: #eef2f7;
+    font-family: Arial;
+  }
+
+  /* MAIN */
+  .main {
+    margin-left: 260px;
+    padding: 20px;
+  }
+
+  /* CARD FORM */
+  .form-card {
+    border: none;
+    border-radius: 12px;
+  }
+
+  .form-label {
+    font-weight: bold;
+  }
+
+  .btn-primary {
+    background: #0b3d91;
+    border: none;
+  }
+
+  .btn-primary:hover {
+    background: #072d6b;
+  }
+
+  /* MOBILE */
+  @media(max-width:768px) {
+    .main {
+      margin-left: 0;
+    }
+  }
+
+</style>
+{% endblock %}
+
+{% block contents %}
+<div class="card form-card shadow-sm">
+  <div class="card-header">
+    <h6 class="mb-0">
+      <i class="fa fa-building"></i> Customer Information
+    </h6>
+  </div>
+  <div class="card-body">
+    <form method="POST"> {% csrf_token %} <div class="mb-3">
+        <label class="form-label">Nama Customer</label>
+        <input type="text" name="nama" class="form-control" placeholder="Nama customer" required>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Alamat</label>
+        <input type="text" name="alamat" class="form-control" placeholder="Alamat customer" required>
+      </div>
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label class="form-label">No Telepon</label>
+          <input type="text" name="telpon" class="form-control" placeholder="0812xxxxxxx" required>
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">Kontak Person</label>
+          <input type="text" name="kontak_person" class="form-control" placeholder="Nama PIC" required>
+        </div>
+      </div>
+      <div class="mt-4">
+        <button type="submit" class="btn btn-primary">
+          <i class="fa fa-save"></i> Save Customer </button>
+        <button type="reset" class="btn btn-secondary">
+          <i class="fa fa-refresh"></i> Reset </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% endblock %}

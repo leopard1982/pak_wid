@@ -1,0 +1,77 @@
+{% extends 'base.html'%}
+
+{% block header %}
+<style>
+  body {
+    background: #eef2f7;
+    font-family: Arial;
+  }
+
+  /* MAIN */
+  .main {
+    margin-left: 260px;
+    padding: 20px;
+  }
+
+  /* CARD FORM */
+  .form-card {
+    border: none;
+    border-radius: 12px;
+  }
+
+  .form-label {
+    font-weight: bold;
+  }
+
+  .btn-primary {
+    background: #0b3d91;
+    border: none;
+  }
+
+  .btn-primary:hover {
+    background: #072d6b;
+  }
+
+  /* MOBILE */
+  @media(max-width:768px) {
+    .main {
+      margin-left: 0;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block contents %}
+
+<div class="card form-card shadow-sm">
+  <div class="card-header">
+    <h6 class="mb-0">
+      <i class="fa fa-desktop"></i> Device Information
+    </h6>
+  </div>
+  <div class="card-body">
+    <form method="POST"> {% csrf_token %} <div class="row">
+        <div class="col-md-6 mb-3">
+          <label class="form-label">ID Device</label>
+          <input type="text" name="id_device" class="form-control" placeholder="Contoh: DEV-001">
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">Nama Device</label>
+          <input type="text" name="nama_device" class="form-control" placeholder="Nama device">
+        </div>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Keterangan</label>
+        <textarea name="keterangan" class="form-control" rows="3" placeholder="Keterangan device"></textarea>
+      </div>
+      <div class="mt-4">
+        <button type="submit" class="btn btn-primary">
+          <i class="fa fa-save"></i> Save Device </button>
+        <button type="reset" class="btn btn-secondary">
+          <i class="fa fa-refresh"></i> Reset </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% endblock %}
