@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -20,23 +21,17 @@
       /* LOGIN CARD */
       .login-card {
         width: 380px;
-        border: 1px solid blue;
         border-radius: 15px;
         box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        overflow: hidden;
       }
 
-      /* HEADER */
-      .login-header {
-        background: #0b3d91;
-        color: white;
-        text-align: center;
-        padding: 25px;
-        border-top-left-radius: 15px;
-        border-top-right-radius: 15px;
-      }
-
-      .login-header i {
-        font-size: 40px;
+      /* HEADER IMAGE */
+      .login-header img {
+        width: 100%;
+        height: 140px;
+        object-fit: cover;
+        display: block;
       }
 
       /* INPUT */
@@ -68,36 +63,29 @@
         margin-top: 10px;
         color: #777;
       }
-      .alert-top-right{
-          position: fixed;
-          top:20px;
-          right:20px;
-          z-index:2000;
-          width:400px;
+
+      /* ALERT */
+      .alert-top-right {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 2000;
+        width: 400px;
       }
     </style>
   </head>
   <body>
-      <!-- MESSAGE INFORMATION -->
-    {% if messages %}
-      {% for message in messages %}      
-        <div class="alert alert-info alert-dismissible fade show shadow-sm alert-top-right" role="alert">
-          <i class="fa fa-info-circle"></i>
-          <strong>Informasi:</strong> {{message}}
-          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-      {% endfor%}
-    {% endif %}
-
-    <div class="card login-card">
-      <div class="login-header">
-        <i class="fa fa-server"></i>
-        <h4 class="mt-2">Device Manager</h4>
+    <!-- MESSAGE --> {% if messages %} {% for message in messages %} <div class="alert alert-info alert-dismissible fade show shadow-sm alert-top-right">
+      <i class="fa fa-info-circle"></i>
+      <strong>Informasi:</strong> {{message}}
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div> {% endfor %} {% endif %} <div class="card login-card">
+      <!-- HEADER IMAGE -->
+      <div class="login-header d-flex justify-content-center">
+        <img src="{% static 'images/logo.png' %}" style="width: 300px;">
       </div>
       <div class="card-body p-4">
-        <form method="POST">
-          {% csrf_token %}
-          <div class="mb-3 position-relative">
+        <form method="POST"> {% csrf_token %} <div class="mb-3 position-relative">
             <i class="fa fa-user input-icon"></i>
             <input type="text" class="form-control" placeholder="Username" name="username">
           </div>

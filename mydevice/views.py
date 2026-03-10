@@ -208,4 +208,5 @@ def DetailPinjam(request):
 
 def Logout(request):
     logout(request)
+    messages.add_message(request,messages.SUCCESS,"Anda berhasil Keluar.")
     return HttpResponseRedirect('/login/')

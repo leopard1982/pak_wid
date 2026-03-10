@@ -1,335 +1,285 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <!-- BOOTSTRAP JS BUNDLE (sudah termasuk Popper) -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Device Management</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <style>
+      body {
+        background: #eef2f7;
+        font-family: Arial;
+      }
 
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Device Management</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-  <style>
-    body {
-      background: #eef2f7;
-      font-family: Arial;
-    }
-
-    /* SIDEBAR */
-    .sidebar {
-      height: 100vh;
-      width: 260px;
-      position: fixed;
-      background: #0b3d91;
-      color: white;
-      transition: 0.3s;
-      overflow-y: auto;
-      z-index: 1050;
-      box-shadow: 4px 0px 20px rgba(0, 0, 0, 0.25);
-    }
-
-    /* SIDEBAR HEADER */
-    .sidebar-header {
-      padding: 0;
-      background: #072d6b;
-      text-align: center;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-    }
-
-    .sidebar-header img {
-      width: 100%;          /* penuh lebar sidebar */
-      height: 120px;        /* tinggi tetap */
-      object-fit: cover;    /* gambar proporsional, tidak gepeng */
-      display: block;
-      background-color: white;
-      padding:10px;
-    }
-
-    img {
-      width: 80%;
-      height: 80%;
-    }
-
-
-    .sidebar-header h4 {
-      margin: 0;
-      font-weight: bold;
-      font-size: 18px;
-    }
-
-    .sidebar-header small {
-      opacity: 0.8;
-      font-size: 12px;
-    }
-
-    /* SECTION TITLE */
-    .sidebar-title {
-      padding: 12px 20px;
-      font-size: 12px;
-      letter-spacing: 1px;
-      opacity: 0.7;
-    }
-
-    /* MENU */
-    .sidebar a {
-      display: block;
-      color: white;
-      padding: 13px 20px;
-      text-decoration: none;
-      font-size: 15px;
-    }
-
-    .sidebar a:hover {
-      background: #072d6b;
-    }
-
-    .sidebar i {
-      width: 22px;
-    }
-
-    /* SUBMENU */
-    .submenu {
-      display: none;
-      background: #072d6b;
-    }
-
-    .submenu a {
-      padding-left: 50px;
-      font-size: 14px;
-    }
-
-    /* MAIN */
-    .main {
-      margin-left: 260px;
-      padding: 20px;
-    }
-
-    /* TOPBAR */
-    .topbar {
-      background: white;
-      padding: 12px 20px;
-      border-radius: 10px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    }
-
-    /* OVERLAY */
-    .overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.4);
-      display: none;
-      z-index: 1040;
-    }
-
-    .overlay.active {
-      display: block;
-    }
-
-    /* MOBILE */
-    @media(max-width:768px) {
+      /* SIDEBAR */
       .sidebar {
-        left: -260px;
+        height: 100vh;
+        width: 260px;
+        position: fixed;
+        background: #0b3d91;
+        color: white;
+        transition: 0.3s;
+        z-index: 1050;
+        box-shadow: 4px 0px 20px rgba(0, 0, 0, 0.25);
       }
 
-      .sidebar.active {
-        left: 0;
+      /* SIDEBAR HEADER (STATIC) */
+      .sidebar-header {
+        height: 120px;
+        background: #072d6b;
       }
 
+      .sidebar-header img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        background: white;
+        padding: 10px;
+      }
+
+      /* MENU SCROLL AREA */
+      .sidebar-menu {
+        height: calc(100vh - 120px);
+        overflow-y: auto;
+      }
+
+      /* SCROLLBAR */
+      .sidebar-menu::-webkit-scrollbar {
+        width: 6px;
+      }
+
+      .sidebar-menu::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.3);
+        border-radius: 3px;
+      }
+
+      /* SECTION TITLE */
+      .sidebar-title {
+        padding: 12px 20px;
+        font-size: 12px;
+        letter-spacing: 1px;
+        opacity: 0.7;
+      }
+
+      /* MENU */
+      .sidebar a {
+        display: block;
+        color: white;
+        padding: 13px 20px;
+        text-decoration: none;
+        font-size: 15px;
+      }
+
+      .sidebar a:hover {
+        background: #072d6b;
+      }
+
+      .sidebar i {
+        width: 22px;
+      }
+
+      /* SUBMENU */
+      .submenu {
+        display: none;
+        background: #072d6b;
+      }
+
+      .submenu a {
+        padding-left: 50px;
+        font-size: 14px;
+      }
+
+      /* MAIN */
       .main {
-        margin-left: 0;
+        margin-left: 260px;
+        padding: 20px;
       }
-    }
-    
-    .smooth-alert {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      z-index: 2000;          /* di atas konten */
-      border-radius: 10px;
-      font-size: 14px;
-      transition: all 0.4s ease-in-out;
-      min-width: 250px;
-    }
 
-    .smooth-alert i {
-      margin-right: 6px;
-    }
+      /* TOPBAR */
+      .topbar {
+        background: white;
+        padding: 12px 20px;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
 
-    .smooth-alert:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 15px rgba(0,0,0,0.15);
-    }
-    td,th {
-      font-size: 13px;
-      width: 100px;;
-    }
-    .btn {
-      font-size: 14px;
-    }
-  </style>
-</head>
-<body>
-  <!-- MESSAGE INFORMATION -->
-   {% if messages %}
-    {% for message in messages %}
-      <div class="alert alert-info alert-dismissible fade show shadow-sm smooth-alert" role="alert">
-        <i class="fa fa-info-circle"></i>
-        <strong>Informasi:</strong> {{message}}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-      </div>
-    {% endfor%}
-  {% endif %}
+      /* OVERLAY */
+      .overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.4);
+        display: none;
+        z-index: 1040;
+      }
 
+      .overlay.active {
+        display: block;
+      }
 
-
-  <!-- SIDEBAR -->
-  <div class="sidebar" id="sidebar">
-    <div class="sidebar-header">
-      <img src="{% static 'images/logo.png'%}" alt="Logo">      
-    </div>
-
-    <div class="sidebar-title"> MAIN MENU </div>
-    <a href="/">
-      <i class="fa fa-dashboard"></i> Dashboard
-    </a>
-    <a href="#" class="menu-toggle">
-      <i class="fa fa-desktop"></i> Devices <span class="float-end">
-        <i class="fa fa-caret-down"></i>
-      </span>
-    </a>
-    <div class="submenu" {% if id == 1 %} style="display: block;" {% endif %}>
-      <a href="/device/list/">
-        <i class="fa fa-list"></i> Daftar Device
-      </a>
-      {% if user.userprofile.role != 'viewer' %}
-        <a href="/device/add/">
-          <i class="fa fa-plus-circle"></i> Tambah Device
-        </a>
-      {% endif%}
-    </div>
-
-    <a href="#" class="menu-toggle">
-      <i class="fa fa-id-card"></i> Customer <span class="float-end">
-        <i class="fa fa-caret-down"></i>
-      </span>
-    </a>
-    <div class="submenu" {% if id == 2 %} style="display: block;" {% endif %}>
-      <a href="/customer/list/">
-        <i class="fa fa-list"></i> Daftar Customer
-      </a>
-      {% if user.userprofile.role != 'viewer' %}
-        <a href="/customer/add/">
-          <i class="fa fa-plus-circle"></i> Tambah Customer
-        </a>
-      {% endif %}
-    </div>
-
-    {% if user.userprofile.role == 'super' %}
-    <a href="#" class="menu-toggle">
-      <i class="fa fa-user"></i> Pengguna <span class="float-end">
-        <i class="fa fa-caret-down"></i>
-      </span>
-    </a>    
-    <div class="submenu" {% if id == 5 %} style="display: block;" {% endif %}>
-      <a href="/user/list/">
-        <i class="fa fa-list"></i> Daftar Pengguna
-      </a>
-      <a href="/user/add/">
-        <i class="fa fa-plus-circle"></i> Tambah Pengguna
-      </a>
-    </div>
-    {% endif %}
-
-    <div class="sidebar-title"> TRANSAKSI </div>
-    <a href="#" class="menu-toggle">
-      <i class="fa fa-exchange"></i> Peminjaman <span class="float-end">
-        <i class="fa fa-caret-down"></i>
-      </span>
-    </a>
-    <div class="submenu" {% if id == 3 %} style="display: block;" {% endif %}>
-      <a href="/pinjam/list/">
-        <i class="fa fa-list"></i> Daftar Peminjaman
-      </a>
-      <a href="/pinjam/header/">
-        <i class="fa fa-plus-circle"></i> Tambah Peminjaman
-      </a>
-    </div>
-
-    <div class="sidebar-title"> SYSTEM </div>
-    <a href="#" class="menu-toggle">
-      <i class="fa fa-user-circle"></i> Profile <span class="float-end">
-        <i class="fa fa-caret-down"></i>
-      </span>
-    </a>
-    <div class="submenu">
-      <a href="#">
-        <i class="fa fa-key"></i> Ganti Password
-      </a>
-      <a href="/logout/">
-        <i class="fa fa-sign-out"></i> Logout
-      </a>
-    </div>
-    {% if user.userprofile.role == 'super' %}
-      <a href="#">
-        <i class="fa fa-tags"></i> Log History
-      </a>
-    {% endif %}
-  </div>
-
-  <!-- OVERLAY -->
-  <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
-
-  <!-- MAIN -->
-  <div class="main">
-    <div class="topbar mb-4 d-flex justify-content-between align-items-center">
-      <button class="btn btn-outline-primary d-md-none" onclick="toggleSidebar()">
-        <i class="fa fa-bars"></i>
-      </button>
-      <h5 class="mb-0">
-        <i class="fa fa-server"></i> <b>{{menu}}</b>
-      </h5>
-      <div class="d-none d-xxl-block d-xl-block d-lg-block">
-        <i class="fa fa-user-circle"></i> {{user.userprofile.nama_lengkap|truncatechars:15}}
-      </div>
-    </div>
-    {% block contents %}
-      {% include 'views/dashboard.html'%}
-    {% endblock %}
-  </div>
-
-  <!-- SCRIPT -->
-  <script>
-    function toggleSidebar() {
-      let sidebar = document.getElementById("sidebar")
-      let overlay = document.getElementById("overlay")
-      sidebar.classList.toggle("active")
-      overlay.classList.toggle("active")
-    }
-    document.querySelectorAll(".menu-toggle").forEach(menu => {
-      menu.addEventListener("click", function(e) {
-        e.preventDefault()
-        let submenu = this.nextElementSibling
-        if (submenu.style.display === "block") {
-          submenu.style.display = "none"
-        } else {
-          submenu.style.display = "block"
+      /* MOBILE */
+      @media(max-width:768px) {
+        .sidebar {
+          left: -260px;
         }
-      })
-    })
-  </script>
-  <script>
-    // Auto dismiss setelah 3 detik
-    setTimeout(function() {
-      let alertEl = document.getElementById('infoAlert');
-      if (alertEl) {
-        let bsAlert = new bootstrap.Alert(alertEl);
-        bsAlert.close();
+
+        .sidebar.active {
+          left: 0;
+        }
+
+        .main {
+          margin-left: 0;
+        }
       }
-    }, 3000);
-</script>
-</body>
+
+      /* ALERT */
+      .smooth-alert {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 2000;
+        border-radius: 10px;
+        font-size: 14px;
+        min-width: 250px;
+      }
+
+      .smooth-alert i {
+        margin-right: 6px;
+      }
+
+      td,
+      th {
+        font-size: 13px;
+      }
+
+      .btn {
+        font-size: 14px;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- MESSAGE --> {% if messages %} {% for message in messages %} <div class="alert alert-info alert-dismissible fade show shadow-sm smooth-alert">
+      <i class="fa fa-info-circle"></i>
+      <strong>Informasi:</strong> {{message}}
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div> {% endfor %} {% endif %}
+    <!-- SIDEBAR -->
+    <div class="sidebar" id="sidebar">
+      <!-- HEADER -->
+      <div class="sidebar-header">
+        <img src="{% static 'images/logo.png'%}">
+      </div>
+      <!-- MENU SCROLL -->
+      <div class="sidebar-menu">
+        <div class="sidebar-title">MAIN MENU</div>
+        <a href="/">
+          <i class="fa fa-dashboard"></i> Dashboard </a>
+        <a href="#" class="menu-toggle">
+          <i class="fa fa-desktop"></i> Devices <span class="float-end">
+            <i class="fa fa-caret-down"></i>
+          </span>
+        </a>
+        <div class="submenu" {% if id == 1 %}style="display:block;" {% endif %}>
+          <a href="/device/list/">
+            <i class="fa fa-list"></i> Daftar Device </a> {% if user.userprofile.role != 'viewer' %} <a href="/device/add/">
+            <i class="fa fa-plus-circle"></i> Tambah Device </a> {% endif %}
+        </div>
+        <a href="#" class="menu-toggle">
+          <i class="fa fa-id-card"></i> Customer <span class="float-end">
+            <i class="fa fa-caret-down"></i>
+          </span>
+        </a>
+        <div class="submenu" {% if id == 2 %}style="display:block;" {% endif %}>
+          <a href="/customer/list/">
+            <i class="fa fa-list"></i> Daftar Customer </a> {% if user.userprofile.role != 'viewer' %} <a href="/customer/add/">
+            <i class="fa fa-plus-circle"></i> Tambah Customer </a> {% endif %}
+        </div> {% if user.userprofile.role == 'super' %} <a href="#" class="menu-toggle">
+          <i class="fa fa-user"></i> Pengguna <span class="float-end">
+            <i class="fa fa-caret-down"></i>
+          </span>
+        </a>
+        <div class="submenu" {% if id == 5 %}style="display:block;" {% endif %}>
+          <a href="/user/list/">
+            <i class="fa fa-list"></i> Daftar Pengguna </a>
+          <a href="/user/add/">
+            <i class="fa fa-plus-circle"></i> Tambah Pengguna </a>
+        </div> {% endif %} <div class="sidebar-title">TRANSAKSI</div>
+        <a href="#" class="menu-toggle">
+          <i class="fa fa-exchange"></i> Peminjaman <span class="float-end">
+            <i class="fa fa-caret-down"></i>
+          </span>
+        </a>
+        <div class="submenu" {% if id == 3 %}style="display:block;" {% endif %}>
+          <a href="/pinjam/list/">
+            <i class="fa fa-list"></i> Daftar Peminjaman </a>
+          <a href="/pinjam/header/">
+            <i class="fa fa-plus-circle"></i> Tambah Peminjaman </a>
+        </div>
+        <div class="sidebar-title">SYSTEM</div>
+        <a href="#" class="menu-toggle">
+          <i class="fa fa-user-circle"></i> Profile <span class="float-end">
+            <i class="fa fa-caret-down"></i>
+          </span>
+        </a>
+        <div class="submenu">
+          <a href="#">
+            <i class="fa fa-key"></i> Ganti Password </a>
+          <a href="/logout/">
+            <i class="fa fa-sign-out"></i> Logout </a>
+        </div> {% if user.userprofile.role == 'super' %} <a href="#">
+          <i class="fa fa-tags"></i> Log History </a> {% endif %}
+      </div>
+    </div>
+    <!-- OVERLAY -->
+    <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+    <!-- MAIN -->
+    <div class="main">
+      <div class="topbar mb-4 d-flex justify-content-between align-items-center">
+        <button class="btn btn-outline-primary d-md-none" onclick="toggleSidebar()">
+          <i class="fa fa-bars"></i>
+        </button>
+        <h5 class="mb-0">
+          <i class="fa fa-server"></i>
+          <b>{{menu}}</b>
+        </h5>
+        <div class="d-none d-xl-block">
+          <i class="fa fa-user-circle"></i>
+          {{user.userprofile.nama_lengkap|truncatechars:15}}
+        </div>
+      </div> {% block contents %} {% include 'views/dashboard.html'%} {% endblock %}
+    </div>
+    <script>
+      function toggleSidebar() {
+        let sidebar = document.getElementById("sidebar")
+        let overlay = document.getElementById("overlay")
+        sidebar.classList.toggle("active")
+        overlay.classList.toggle("active")
+      }
+      document.querySelectorAll(".menu-toggle").forEach(menu => {
+        menu.addEventListener("click", function(e) {
+          e.preventDefault()
+          let submenu = this.nextElementSibling
+          if (submenu.style.display === "block") {
+            submenu.style.display = "none"
+          } else {
+            submenu.style.display = "block"
+          }
+        })
+      })
+    </script>
+    <script>
+      setTimeout(function() {
+        let alert = document.querySelector(".smooth-alert")
+        if (alert) {
+          let bsAlert = new bootstrap.Alert(alert)
+          bsAlert.close()
+        }
+      }, 3000)
+    </script>
+  </body>
 </html>
