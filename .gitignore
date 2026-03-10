@@ -3,3 +3,4 @@ mydevice/__pycache__
 mydevice/migrations
 mydevice/migrations/__pycache__
 management_device/settings.py
+.venv
