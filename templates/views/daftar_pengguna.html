@@ -58,7 +58,7 @@
     <h6 class="mb-0">
       <i class="fa fa-users"></i> Daftar Pengguna
     </h6>
-    <a href="" class="btn btn-primary btn-sm">
+    <a href="/user/add/" class="btn btn-primary btn-sm">
       <i class="fa fa-plus"></i> Add User </a>
   </div>
   <div class="card-body">
@@ -75,17 +75,17 @@
         </thead>
         <tbody> {% for u in users %} <tr>
             <td>{{ forloop.counter }}</td>
-            <td>{{ u.user.username }}</td>
-            <td>{{ u.nama_lengkap }}</td>
-            <td> {% if u.role == "super" %} <span class="badge bg-danger badge-role">
-                <i class="fa fa-star"></i> Super </span> {% elif u.role == "admin" %} <span class="badge bg-primary badge-role">
+            <td>{{ u.username }}</td>
+            <td>{{ u.userprofile.nama_lengkap }}</td>
+            <td> {% if u.userprofile.role == "super" %} <span class="badge bg-danger badge-role">
+                <i class="fa fa-star"></i> Super </span> {% elif u.userprofile.role == "admin" %} <span class="badge bg-primary badge-role">
                 <i class="fa fa-user"></i> Admin </span> {% else %} <span class="badge bg-secondary badge-role">
                 <i class="fa fa-eye"></i> Viewer </span> {% endif %} </td>
             <td>
-              <a href="{% url 'user_edit' u.id %}" class="btn btn-warning btn-sm">
+              <a href="{% url 'edit_pengguna' u.id %}" class="btn btn-warning btn-sm">
                 <i class="fa fa-edit"></i>
               </a>
-              <a href="{% url 'user_delete' u.id %}" class="btn btn-danger btn-sm">
+              <a href="{% url 'hapus_pengguna' u.id %}" class="btn btn-danger btn-sm">
                 <i class="fa fa-trash"></i>
               </a>
             </td>

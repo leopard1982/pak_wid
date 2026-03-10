@@ -58,7 +58,7 @@
     <h6 class="mb-0">
       <i class="fa fa-desktop"></i> Device List
     </h6>
-    <a href="" class="btn btn-primary btn-sm">
+    <a href="/device/add/" class="btn btn-primary btn-sm">
       <i class="fa fa-plus"></i> Add Device </a>
   </div>
   <div class="card-body">
@@ -76,9 +76,9 @@
             <th width="120">Action</th>
           </tr>
         </thead>
-        <tbody> {% for d in devices %} <tr>
+        <tbody> {% for d in device %} <tr>
             <td>{{ forloop.counter }}</td>
-            <td>{{ d.id_device }}</td>
+            <td>{{ d.id_device | upper }}</td>
             <td>{{ d.nama_device }}</td>
             <td>{{ d.keterangan }}</td>
             <td> {% if d.is_out %} <span class="badge bg-warning badge-device">
@@ -87,12 +87,12 @@
             <td> {% if d.is_ok %} <span class="badge bg-primary badge-device">
                 <i class="fa fa-check-circle"></i> OK </span> {% else %} <span class="badge bg-danger badge-device">
                 <i class="fa fa-times-circle"></i> Rusak </span> {% endif %} </td>
-            <td>{{ d.tanggal_buat }}</td>
+            <td>{{ d.created_at | date:"d-M-Y" }}</td>
             <td>
-              <a href="{% url 'device_edit' d.id %}" class="btn btn-warning btn-sm">
+              <a href="{% url 'edit_device' d.id %}" class="btn btn-warning btn-sm m-1">
                 <i class="fa fa-edit"></i>
               </a>
-              <a href="{% url 'device_delete' d.id %}" class="btn btn-danger btn-sm">
+              <a href="{% url 'hapus_device' d.id %}" class="btn btn-danger btn-sm m-1">
                 <i class="fa fa-trash"></i>
               </a>
             </td>

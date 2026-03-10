@@ -1,7 +1,4 @@
-{% extends 'base.html'%}
-
-{% block header %}
-<style>
+{% extends 'base.html'%} {% block header %} <style>
   body {
     background: #eef2f7;
     font-family: Arial;
@@ -38,40 +35,33 @@
       margin-left: 0;
     }
   }
-</style>
-{% endblock %}
-
-{% block contents %}
-
-<div class="card form-card shadow-sm">
+</style> {% endblock %} {% block contents %} <div class="card form-card shadow-sm">
   <div class="card-header">
     <h6 class="mb-0">
-      <i class="fa fa-desktop"></i> Device Information
+      <i class="fa fa-edit"></i> Edit Device
     </h6>
   </div>
   <div class="card-body">
-    <form method="POST" target="/device/add/"> {% csrf_token %} <div class="row">
+    <form method="POST" action="{% url 'edit_device' device.id %}"> {% csrf_token %} <div class="row">
         <div class="col-md-6 mb-3">
           <label class="form-label">ID Device</label>
-          <input type="text" name="id_device" class="form-control" placeholder="Contoh: DEV-001">
+          <input type="text" name="id_device" class="form-control" value="{{ device.id_device | upper}}" readonly>
         </div>
         <div class="col-md-6 mb-3">
           <label class="form-label">Nama Device</label>
-          <input type="text" name="nama_device" class="form-control" placeholder="Nama device">
+          <input type="text" name="nama_device" class="form-control" value="{{ device.nama_device }}" required>
         </div>
       </div>
       <div class="mb-3">
         <label class="form-label">Keterangan</label>
-        <textarea name="keterangan" class="form-control" rows="3" placeholder="Keterangan device"></textarea>
+        <textarea name="keterangan" class="form-control" rows="3" required>{{ device.keterangan }}</textarea>
       </div>
       <div class="mt-4">
         <button type="submit" class="btn btn-primary">
-          <i class="fa fa-save"></i> Save Device </button>
-        <button type="reset" class="btn btn-secondary">
-          <i class="fa fa-refresh"></i> Reset </button>
+          <i class="fa fa-save"></i> Update Device </button>
+        <a href="/device/list/" class="btn btn-secondary">
+          <i class="fa fa-arrow-left"></i> Back </a>
       </div>
     </form>
   </div>
-</div>
-
-{% endblock %}
+</div> {% endblock %}

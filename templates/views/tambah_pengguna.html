@@ -107,29 +107,20 @@
         </div>
         <div class="card-body">
           <form method="POST">
+            {% csrf_token %}
             <div class="row">
               <div class="col-12 mb-3">
                 <label class="form-label">Username</label>
-                <input type="text" class="form-control" placeholder="Enter username">
+                <input type="text" name="user" class="form-control" placeholder="masukkan username" required>
               </div>              
             </div>
             <div class="mb-3">
               <label class="form-label">Nama Lengkap</label>
-              <input type="text" class="form-control" placeholder="Nama lengkap">
-            </div>
-            <div class="row">
-              <div class="col-md-6 mb-3">
-                <label class="form-label">Password</label>
-                <input type="password" class="form-control">
-              </div>
-              <div class="col-md-6 mb-3">
-                <label class="form-label">Confirm Password</label>
-                <input type="password" class="form-control">
-              </div>
-            </div>
+              <input type="text" name="nama" class="form-control" placeholder="Nama lengkap" required>
+            </div>            
             <div class="mb-3">
               <label class="form-label">Role</label>
-              <select class="form-control">
+              <select class="form-control" name="role">
                 <option value="super">Super</option>
                 <option value="admin">Admin</option>
                 <option value="viewer">Viewer</option>
