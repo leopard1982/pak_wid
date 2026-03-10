@@ -48,9 +48,11 @@
     <h6 class="mb-0">
       <i class="fa fa-building"></i> Daftar Customer
     </h6>
-    <a href="/customer/add/" class="btn btn-primary btn-sm">
-      <i class="fa fa-plus"></i> Add Customer
-    </a>
+    {% if user.userprofile.role != "viewer" %}
+      <a href="/customer/add/" class="btn btn-primary btn-sm">
+        <i class="fa fa-plus"></i> Add Customer
+      </a>
+    {% endif %}
   </div>
 
   <div class="card-body">
@@ -63,7 +65,7 @@
             <th>Alamat</th>
             <th>Telpon</th>
             <th>Kontak Person</th>
-            <th width="120">Action</th>
+            {% if user.userprofile.role != "viewer" %}<th width="120">Action</th> {% endif %}
           </tr>
         </thead>
         <tbody>
@@ -74,20 +76,17 @@
             <td>{{ c.alamat }}</td>
             <td>{{ c.telpon }}</td>
             <td>{{ c.kontak_person }}</td>
-            <td>
-              <a href="{% url 'customer_edit' c.id %}" class="btn btn-warning btn-sm">
-                <i class="fa fa-edit"></i>
-              </a>
-              <a href="{% url 'customer_delete' c.id %}" class="btn btn-danger btn-sm">
-                <i class="fa fa-trash"></i>
-              </a>
-            </td>
-          </tr>
-          {% empty %}
-          <tr>
-            <!-- pastikan colspan sesuai jumlah kolom -->
-            <td colspan="6" class="text-center">Belum ada data customer</td>
-          </tr>
+            {% if user.userprofile.role != "viewer" %}
+              <td>
+                <a href="/customer/edit/{{c.id}}/" class="btn btn-warning btn-sm">
+                  <i class="fa fa-edit"></i>
+                </a>
+                <a href="/customer/del/{{c.id}}/" class="btn btn-danger btn-sm">
+                  <i class="fa fa-trash"></i>
+                </a>
+              </td>
+            {% endif %}
+          </tr>          
           {% endfor %}
         </tbody>
       </table>

@@ -42,9 +42,13 @@ class MasterCustomer(models.Model):
     alamat = models.CharField(max_length=100)
     telpon = models.CharField(max_length=20)
     kontak_person = models.CharField(max_length=200)
+    slug = models.SlugField(max_length=150)
 
     def __str__(self):
         return self.nama
+    
+    class Meta:
+        unique_together = ['slug']
 
 class HeaderPeminjaman(models.Model):
     id = models.UUIDField(auto_created=True,editable=False,default=uuid.uuid4,primary_key=True)
