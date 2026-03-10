@@ -30,6 +30,7 @@ class MasterDevice(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     updated_by = models.CharField(max_length=200,blank=True,null=True)
     created_by = models.CharField(max_length=200,blank=True,null=True)
+    last_used = models.DateField(blank=True,null=True)
 
     def __str__(self):
         return self.nama_device
@@ -55,7 +56,9 @@ class HeaderPeminjaman(models.Model):
     tanggal_pinjam = models.DateField(blank=True)
     customer = models.ForeignKey(MasterCustomer,on_delete=models.RESTRICT,blank=True,null=True)
     keterangan = models.CharField(max_length=200,blank=True,null=True)
+    penerima_customer = models.CharField(max_length=200,blank=True,null=True)
     is_closed = models.BooleanField(default=False)
+    is_process = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     updated_by = models.CharField(max_length=200,blank=True,null=True)
@@ -71,8 +74,7 @@ class DetailPeminjaman(models.Model):
     lokasi = models.CharField(blank=True,null=True,max_length=100)
     lokasi_koordinat = models.CharField(blank=True,null=True,max_length=100)
     tanggal_dikembalikan = models.DateField(blank=True,null=True)
-    keterangan = models.CharField(max_length=200)
-    penerima_customer = models.CharField(max_length=200,blank=True,null=True)
+    keterangan = models.CharField(max_length=200)    
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)    
 

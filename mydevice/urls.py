@@ -3,11 +3,12 @@ from django.urls import path
 from .views import Dashboard, Login, TambahPengguna, TambahDevice, TambahCustomer, HeaderPinjam
 from .views import DetailPinjam,DaftarDevice, DaftarCustomer,DaftarPengguna,DaftarPinjam
 from .views import EditDevice, HapusDevice,Logout, EditPengguna, HapusPengguna, EditCustomer
-from .views import HapusCustomer
+from .views import HapusCustomer, HapusItemDevice, ProsesPinjaman, HapusDraftPinjaman,Ubahpassword
 
 
 urlpatterns = [
     path('', Dashboard, name="dashboard"),
+    path('paswd/',Ubahpassword,name="ubah_password"),
     path('login/', Login, name="login"),
     path('user/add/', TambahPengguna, name="tambah_pengguna"),
     path('user/edit/<str:id>/', EditPengguna, name="edit_pengguna"),
@@ -22,7 +23,10 @@ urlpatterns = [
     path('customer/del/<str:id>/', HapusCustomer, name="hapus_customer"),
     path('customer/list/', DaftarCustomer, name="daftar_customer"),
     path('pinjam/header/', HeaderPinjam, name="header_pinjam"),
-    path('pinjam/detail/', DetailPinjam, name="detail_pinjam"),
+    path('pinjam/detail/<str:id>/', DetailPinjam, name="detail_pinjam"),
     path('pinjam/list/', DaftarPinjam, name="daftar_pinjam"),
+    path('pinjam/proses/<str:id>/', ProsesPinjaman, name="proses_pinjam"),
+    path('pinjam/hapus/<str:id>/', HapusDraftPinjaman, name="hapus_draft_pinjam"),
+    path('pinjam/detail/del/<str:id>/',HapusItemDevice,name="hapus_item_device"),
     path('logout/',Logout,name="logout")
 ]

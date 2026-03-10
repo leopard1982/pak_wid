@@ -78,10 +78,10 @@
             <td>{{ c.kontak_person }}</td>
             {% if user.userprofile.role != "viewer" %}
               <td>
-                <a href="/customer/edit/{{c.id}}/" class="btn btn-warning btn-sm">
+                <a href="/customer/edit/{{c.id}}/" class="btn btn-warning btn-sm m-1">
                   <i class="fa fa-edit"></i>
                 </a>
-                <a href="/customer/del/{{c.id}}/" class="btn btn-danger btn-sm">
+                <a href="/customer/del/{{c.id}}/" class="btn btn-danger btn-sm m-1">
                   <i class="fa fa-trash"></i>
                 </a>
               </td>

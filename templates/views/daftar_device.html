@@ -94,12 +94,24 @@
             <td>{{ d.created_at | date:"d-M-Y" }}</td>
             {% if user.userprofile.role != "viewer" %}
               <td>
-                <a href="{% url 'edit_device' d.id %}" class="btn btn-warning btn-sm m-1">
-                  <i class="fa fa-edit"></i>
-                </a>
-                <a href="{% url 'hapus_device' d.id %}" class="btn btn-danger btn-sm m-1">
-                  <i class="fa fa-trash"></i>
-                </a>
+                {% if d.is_out %}
+                  <a href="#" class="btn btn-secondary btn-sm m-1">
+                    <i class="fa fa-edit"></i>
+                  </a>
+                {% else %}
+                  <a href="{% url 'edit_device' d.id %}" class="btn btn-warning btn-sm m-1">
+                    <i class="fa fa-edit"></i>
+                  </a>
+                {% endif %}
+                {% if d.last_used %}
+                  <a href="#" class="btn btn-secondary btn-sm m-1">
+                    <i class="fa fa-trash"></i>
+                  </a>
+                {% else %}
+                  <a href="{% url 'hapus_device' d.id %}" class="btn btn-danger btn-sm m-1">
+                    <i class="fa fa-trash"></i>
+                  </a>
+                {% endif %}
               </td>
             {% endif %}
           </tr> {% endfor %} </tbody>

@@ -158,7 +158,7 @@
       }
 
       .btn {
-        font-size: 14px;
+        font-size: 12px;
       }
     </style>
   </head>
@@ -227,7 +227,7 @@
           </span>
         </a>
         <div class="submenu">
-          <a href="#">
+          <a href="#" data-bs-toggle="modal" data-bs-target="#modalPassword">
             <i class="fa fa-key"></i> Ganti Password </a>
           <a href="/logout/">
             <i class="fa fa-sign-out"></i> Logout </a>
@@ -281,5 +281,62 @@
         }
       }, 3000)
     </script>
+
+    <!-- MODAL UBAH PASSWORD -->
+<div class="modal fade" id="modalPassword" tabindex="-1">
+  <div class="modal-dialog">
+
+    <div class="modal-content">
+
+      <form method="POST" action="/paswd/">
+        {% csrf_token %}
+
+        <div class="modal-header">
+          <h5 class="modal-title">
+            <i class="fa fa-key"></i> Ubah Password
+          </h5>
+
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+
+
+        <div class="modal-body">
+
+          <div class="mb-3">
+            <label class="form-label">Password Lama</label>
+            <input type="password" name="old_password" class="form-control" required>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Password Baru</label>
+            <input type="password" name="new_password1" class="form-control" required>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Konfirmasi Password Baru</label>
+            <input type="password" name="new_password2" class="form-control" required>
+          </div>
+
+        </div>
+
+
+        <div class="modal-footer">
+
+          <button type="submit" class="btn btn-primary">
+            <i class="fa fa-save"></i> Simpan Password
+          </button>
+
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+            Batal
+          </button>
+
+        </div>
+
+      </form>
+
+    </div>
+
+  </div>
+</div>
   </body>
 </html>

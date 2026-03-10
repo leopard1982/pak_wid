@@ -82,10 +82,10 @@
                 <i class="fa fa-user"></i> Admin </span> {% else %} <span class="badge bg-secondary badge-role">
                 <i class="fa fa-eye"></i> Viewer </span> {% endif %} </td>
             <td>
-              <a href="{% url 'edit_pengguna' u.id %}" class="btn btn-warning btn-sm">
+              <a href="{% url 'edit_pengguna' u.id %}" class="btn btn-warning btn-sm m-1">
                 <i class="fa fa-edit"></i>
               </a>
-              <a href="{% url 'hapus_pengguna' u.id %}" class="btn btn-danger btn-sm">
+              <a href="{% url 'hapus_pengguna' u.id %}" class="btn btn-danger btn-sm m-1">
                 <i class="fa fa-trash"></i>
               </a>
             </td>

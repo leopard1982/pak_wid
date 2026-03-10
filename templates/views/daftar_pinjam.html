@@ -95,7 +95,7 @@
 
         <tbody>
 
-        {% for p in peminjamans %}
+        {% for p in pinjaman %}
 
         <tr>
 
@@ -103,7 +103,7 @@
 
           <td>{{ p.id|truncatechars:8 }}</td>
 
-          <td>{{ p.tanggal_pinjam }}</td>
+          <td>{{ p.tanggal_pinjam|date:"d/m/Y" }}</td>
 
           <td>{{ p.customer.nama }}</td>
 
@@ -128,11 +128,19 @@
           </td>
 
           <td>
-
-            <a href="{% url 'peminjaman_detail' p.id %}" class="btn btn-info btn-sm">
-              <i class="fa fa-eye"></i> Detail
+            {% if p.is_process %}
+            <a href="/pinjam/detail/{{p.id}}/" class="btn btn-info btn-sm m-1">
+              <i class="fa fa-eye"></i>
             </a>
-
+            {% else %}
+            <a href="/pinjam/detail/{{p.id}}/" class="btn btn-warning btn-sm m-1">
+              <i class="fa fa-edit"></i>
+            </a>
+            {% endif %}
+            <a {% if p.is_process %}href="#" class="btn btn-secondary btn-sm m-1"{%else%}href="/pinjam/hapus/{{p.id}}/" class="btn btn-danger btn-sm m-1"{%endif %}>
+                <i class="fa fa-trash"></i>
+            </a>
+            
           </td>
 
         </tr>

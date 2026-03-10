@@ -53,7 +53,7 @@
     <form method="POST"> {% csrf_token %} <div class="row">
         <div class="col-md-6 mb-3">
           <label class="form-label">Tanggal Pinjam</label>
-          <input type="date" name="tanggal_pinjam" class="form-control" required>
+          <input type="date" name="tanggal_pinjam" class="form-control" required max="{% now 'Y-m-d' %}">
         </div>
         <div class="col-md-6 mb-3">
           <label class="form-label">Customer</label>
@@ -61,9 +61,13 @@
         </div>
       </div>
       <div class="mb-3">
-        <label class="form-label">Keterangan</label>
-        <textarea name="keterangan" class="form-control" rows="3" placeholder="Keterangan transaksi"></textarea>
+        <label class="form-label">Penerima</label>
+        <input type="text" name="penerima_customer" class="form-control" rows="3" placeholder="Nama Penerima Barang" required/>
       </div>
+      <div class="mb-3">
+        <label class="form-label">Keterangan</label>
+        <textarea name="keterangan" class="form-control" rows="3" placeholder="Catatan mengenai Peminjaman" required></textarea>
+      </div>      
       <div class="mt-4">
         <button type="submit" class="btn btn-primary">
           <i class="fa fa-save"></i> Ke Detail Transaksi </button>
