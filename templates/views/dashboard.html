@@ -55,23 +55,23 @@
             <h6>
                 <i class="fa fa-desktop"></i> Total Devices
             </h6>
-            <h3>120</h3>
+            <h3>{{jml_ok}}</h3>
         </div>
     </div>
     <div class="col-md-4 mb-3">
         <div class="card card-stat card-green p-3">
         <h6>
-            <i class="fa fa-check-circle"></i> Online
+            <i class="fa fa-check-circle"></i> Device Ready
         </h6>
-        <h3>98</h3>
+        <h3>{{jml_available}}</h3>
         </div>
     </div>
     <div class="col-md-4 mb-3">
         <div class="card card-stat card-orange p-3">
         <h6>
-            <i class="fa fa-times-circle"></i> Offline
+            <i class="fa fa-times-circle"></i> Total Customer
         </h6>
-        <h3>22</h3>
+        <h3>{{jml_customer}}</h3>
         </div>
     </div>
     </div>
@@ -81,59 +81,86 @@
         <h6 class="mb-0">
         <i class="fa fa-list"></i> Device List
         </h6>
-        <button class="btn btn-primary btn-sm">
-        <i class="fa fa-plus"></i> Add Device </button>
+        {% if user.userprofile.role != 'viewer' %}
+            <a href="/device/add/" class="btn btn-primary btn-sm">
+            <i class="fa fa-plus"></i> Add Device </a>
+        {% endif%}
     </div>
     <div class="card-body">
         <div class="table-responsive">
-        <table class="table table-striped">
+        <table class="table table-striped table-bordered" id="tableDevice">
             <thead>
             <tr>
-                <th>ID</th>
-                <th>Device</th>
-                <th>IP Address</th>
+                <th width="60">No</th>
+                <th>ID Device</th>
+                <th>Nama Device</th>
+                <th>Keterangan</th>
                 <th>Status</th>
-                <th>Location</th>
-                <th>Action</th>
+                <th>Kondisi</th>
+                <th>Tanggal Buat</th>
+                {% if user.userprofile.role != "viewer" %}
+                <th width="120">Action</th>
+                {% endif %}
             </tr>
             </thead>
-            <tbody>
-            <tr>
-                <td>1</td>
-                <td>Router Core</td>
-                <td>192.168.1.1</td>
+            <tbody> {% for d in device %} <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ d.id_device | upper }}</td>
+                <td>{{ d.nama_device }}</td>
+                <td>{{ d.keterangan }}</td>
+                <td> {% if d.is_out %} <span class="badge bg-warning badge-device">
+                    <i class="fa fa-share"></i> Dipinjam </span> {% else %} <span class="badge bg-success badge-device">
+                    <i class="fa fa-check"></i> Available </span> {% endif %} </td>
+                <td> {% if d.is_ok %} <span class="badge bg-primary badge-device">
+                    <i class="fa fa-check-circle"></i> OK </span> {% else %} <span class="badge bg-danger badge-device">
+                    <i class="fa fa-times-circle"></i> Rusak </span> {% endif %} </td>
+                <td>{{ d.created_at | date:"d-M-Y" }}</td>
+                {% if user.userprofile.role != "viewer" %}
                 <td>
-                <span class="badge bg-success">Online</span>
+                    {% if d.is_out %}
+                    <a href="#" class="btn btn-secondary btn-sm m-1">
+                        <i class="fa fa-edit"></i>
+                    </a>
+                    {% else %}
+                    <a href="{% url 'edit_device' d.id %}" class="btn btn-warning btn-sm m-1">
+                        <i class="fa fa-edit"></i>
+                    </a>
+                    {% endif %}
+                    {% if d.last_used %}
+                    <a href="#" class="btn btn-secondary btn-sm m-1">
+                        <i class="fa fa-trash"></i>
+                    </a>
+                    {% else %}
+                    <a href="{% url 'hapus_device' d.id %}" class="btn btn-danger btn-sm m-1">
+                        <i class="fa fa-trash"></i>
+                    </a>
+                    {% endif %}
                 </td>
-                <td>Server Room</td>
-                <td>
-                <button class="btn btn-warning btn-sm">
-                    <i class="fa fa-edit"></i>
-                </button>
-                <button class="btn btn-danger btn-sm">
-                    <i class="fa fa-trash"></i>
-                </button>
-                </td>
-            </tr>
-            <tr>
-                <td>2</td>
-                <td>Switch Lantai 2</td>
-                <td>192.168.1.10</td>
-                <td>
-                <span class="badge bg-danger">Offline</span>
-                </td>
-                <td>Lantai 2</td>
-                <td>
-                <button class="btn btn-warning btn-sm">
-                    <i class="fa fa-edit"></i>
-                </button>
-                <button class="btn btn-danger btn-sm">
-                    <i class="fa fa-trash"></i>
-                </button>
-                </td>
-            </tr>
-            </tbody>
-        </table>
+                {% endif %}
+            </tr> {% endfor %} </tbody>
+            </table>
         </div>
     </div>
 </div>
+
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<!-- DATATABLE JS -->
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+<script>
+$(document).ready(function(){
+  $('#tableDevice').DataTable({
+    pageLength: 10,
+    lengthMenu: [5,10,25,50],
+    language: {
+      search: "Cari Device:",
+      lengthMenu: "Tampilkan _MENU_ data",
+      info: "Menampilkan _START_ to _END_ of _TOTAL_ Devices",
+      paginate: {
+        previous: "Prev",
+        next: "Next"
+      }
+    }
+  });
+});
+</script>

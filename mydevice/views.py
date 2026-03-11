@@ -5,7 +5,7 @@ from .models import MasterDevice, UserProfile, MasterCustomer, HeaderPeminjaman,
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login,logout
 import datetime
-from django.db.models import Q
+from django.db.models import Q, Count
 
 '''
 untuk menu tambahkan ke konteks
@@ -17,8 +17,16 @@ untuk menu tambahkan ke konteks
 # Create your views here.
 def Dashboard(request):    
     if request.user.is_authenticated:
+        devices = MasterDevice.objects.all()
+        jml_ok = devices.filter(is_ok=True).aggregate(jumlah=Count('id_device'))
+        jml_available = devices.filter(Q(is_ok=True) & Q(is_out=False)).aggregate(jumlah=Count('id_device'))
+        jml_customer = MasterCustomer.objects.all().aggregate(jumlah=Count('nama'))
         context = {
-            'menu':'Dashboard'
+            'menu':'Dashboard',
+            'jml_ok':jml_ok['jumlah'],
+            'jml_available':jml_available['jumlah'],
+            'jml_customer':jml_customer['jumlah'],
+            'device':devices
         }
         return render(request,'base.html',context)
     else:

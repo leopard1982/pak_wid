@@ -68,8 +68,8 @@ class HeaderPeminjaman(models.Model):
         return f"{self.customer} | {self.tanggal_pinjam} | {self.is_closed} | {self.keterangan}"
 
 class DetailPeminjaman(models.Model):    
-    peminjaman = models.ForeignKey(HeaderPeminjaman,on_delete=models.CASCADE,blank=True,null=True,related_name="Detail_Peminjam")
-    device = models.ForeignKey(MasterDevice,on_delete=models.CASCADE,blank=True,null=True,related_name="Detail_Device")
+    peminjaman = models.ForeignKey(HeaderPeminjaman,on_delete=models.RESTRICT,blank=True,null=True,related_name="Detail_Peminjam")
+    device = models.ForeignKey(MasterDevice,on_delete=models.RESTRICT,blank=True,null=True,related_name="Detail_Device")
     tanggal_akhir = models.DateField(blank=True,null=True)
     lokasi = models.CharField(blank=True,null=True,max_length=100)
     lokasi_koordinat = models.CharField(blank=True,null=True,max_length=100)
