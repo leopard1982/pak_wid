@@ -8,10 +8,45 @@ from django.core.paginator import Paginator
 from django.http import HttpResponse
 import datetime
 import openpyxl
+import socket
+import ipaddress
 from django.db.models import Q, Count, Max
 
-def write_log(pengguna, keterangan):
-    LogLogin.objects.create(pengguna=pengguna, keterangan=keterangan)
+def get_network_ipv4():
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(('8.8.8.8', 80))
+        ip = s.getsockname()[0]
+        s.close()
+        return ip
+    except Exception:
+        return ''
+
+def is_private_ip(ip):
+    try:
+        return ipaddress.ip_address(ip).is_private
+    except ValueError:
+        return True
+
+def get_client_ip(request):
+    # Cek X-Forwarded-For (IP publik dari proxy/load balancer)
+    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    if x_forwarded_for:
+        ip = x_forwarded_for.split(',')[0].strip()
+        if ip and not is_private_ip(ip):
+            return ip
+
+    # Cek REMOTE_ADDR
+    remote = request.META.get('REMOTE_ADDR', '')
+    if remote and not is_private_ip(remote):
+        return remote
+
+    # IP lokal/private → pakai IP jaringan dari interface
+    return get_network_ipv4()
+
+def write_log(request, pengguna, keterangan):
+    ip = get_client_ip(request)
+    LogLogin.objects.create(pengguna=pengguna, keterangan=keterangan, ip_address=ip)
 
 '''
 untuk menu tambahkan ke konteks
@@ -45,7 +80,7 @@ def Login(request):
         user = authenticate(username=username,password=password)
         if user:
             login(request,user)
-            write_log(user.username, f"Login")
+            write_log(request, user.username, f"Login")
             messages.add_message(request,messages.SUCCESS,f"Selamat datang {user.userprofile.nama_lengkap}!")
             return redirect('/')
         else:
@@ -101,7 +136,7 @@ def EditPengguna(request,id):
                     log_msg = f"Edit Pengguna: {user.username}"
                     if status_lama != status_baru:
                         log_msg += f" | Status: {status_lama} → {status_baru}"
-                    write_log(request.user.username, log_msg)
+                    write_log(request, request.user.username, log_msg)
                     messages.add_message(request,messages.SUCCESS,'Update Pengguna Berhasil Dilakukan.')
                     return redirect('/user/list/')
             except:
@@ -135,7 +170,7 @@ def ToggleStatusPengguna(request, id):
                 user.is_active = not user.is_active
                 user.save()
                 status = "Aktif" if user.is_active else "Nonaktif"
-                write_log(request.user.username, f"Toggle Status Pengguna: {user.username} → {status}")
+                write_log(request, request.user.username, f"Toggle Status Pengguna: {user.username} → {status}")
                 messages.add_message(request, messages.SUCCESS, f'Status {user.username} berhasil diubah menjadi {status}.')
             except:
                 messages.add_message(request, messages.SUCCESS, 'Gagal mengubah status pengguna.')
@@ -151,7 +186,7 @@ def HapusPengguna(request,id):
         if request.user.userprofile.role == "super":    
             try:
                 user = User.objects.get(id=id)
-                write_log(request.user.username, f"Hapus Pengguna: {user.username}")
+                write_log(request, request.user.username, f"Hapus Pengguna: {user.username}")
                 user.delete()
                 messages.add_message(request,messages.SUCCESS,'Hapus Pengguna Berhasil.')
             except Exception as ex:
@@ -181,7 +216,7 @@ def TambahPengguna(request):
                     userprofile.nama_lengkap = request.POST['nama']
                     userprofile.role = request.POST['role']
                     userprofile.save()
-                    write_log(request.user.username, f"Tambah Pengguna: {user.username} [{userprofile.role}]")
+                    write_log(request, request.user.username, f"Tambah Pengguna: {user.username} [{userprofile.role}]")
                     messages.add_message(request,messages.SUCCESS,f'Pengguna {user.username} berhasil ditambahkan sebagai {userprofile.role} dengan password sementara global12345')
             except:
                 messages.add_message(request,messages.SUCCESS,'Pengguna gagal ditambahkan, silakan coba kembali.')
@@ -208,7 +243,7 @@ def TambahDevice(request):
                     device.keterangan = request.POST['keterangan']
                     device.created_by = request.user.userprofile.nama_lengkap
                     device.save()
-                    write_log(request.user.username, f"Tambah Device: {device.nama_device}")
+                    write_log(request, request.user.username, f"Tambah Device: {device.nama_device}")
                     messages.add_message(request,messages.SUCCESS,'Perangkat Berhasil Ditambahkan.')
                 except:
                     messages.add_message(request,messages.SUCCESS,'Perangkat Gagal Ditambahkan, Silakan Coba Kembali.')
@@ -257,7 +292,7 @@ def EditDevice(request,id):
                 log_msg = f"Edit Device: {device.nama_device}"
                 if kondisi_lama != kondisi_baru:
                     log_msg += f" | Kondisi: {kondisi_lama} → {kondisi_baru}"
-                write_log(request.user.username, log_msg)
+                write_log(request, request.user.username, log_msg)
                 messages.add_message(request,messages.SUCCESS,'Update Device Berhasil Dilakukan.')
                 return redirect('/device/list/')
             try:
@@ -288,7 +323,7 @@ def HapusDevice(request,id):
                 if device.last_used:
                     messages.add_message(request,messages.SUCCESS,'Hapus Device Gagal, Device pernah dipakai.')
                 else:
-                    write_log(request.user.username, f"Hapus Device: {device.nama_device}")
+                    write_log(request, request.user.username, f"Hapus Device: {device.nama_device}")
                     device.delete()
                     messages.add_message(request,messages.SUCCESS,'Hapus Device Berhasil.')
             except:
@@ -314,7 +349,7 @@ def TambahCustomer(request):
                     customer.telpon = request.POST['telpon']
                     customer.slug = "-".join(str(request.POST['nama']).lower().split(' '))                
                     customer.save()
-                    write_log(request.user.username, f"Tambah Customer: {customer.nama}")
+                    write_log(request, request.user.username, f"Tambah Customer: {customer.nama}")
                     messages.add_message(request,messages.SUCCESS,"Customer berhasil ditambahkan")
                 except:
                     messages.add_message(request,messages.SUCCESS,"Customer gagal ditambahkan, apakah nama pt pernah dibuat?")
@@ -341,7 +376,7 @@ def EditCustomer(request,id):
                     customer.kontak_person = request.POST['kontak_person']
                     customer.catatan = request.POST.get('catatan', '')
                     customer.save()
-                    write_log(request.user.username, f"Edit Customer: {customer.nama}")
+                    write_log(request, request.user.username, f"Edit Customer: {customer.nama}")
                     messages.add_message(request,messages.SUCCESS,'Update Customer Berhasil Dilakukan.')
                     return redirect('/customer/list/')
             except:
@@ -375,7 +410,7 @@ def HapusCustomer(request,id):
                 if punya_transaksi:
                     messages.add_message(request,messages.SUCCESS,'Hapus Customer Gagal, customer yang sudah pernah bertransaksi tidak dapat dihapus.')
                 else:
-                    write_log(request.user.username, f"Hapus Customer: {customer.nama}")
+                    write_log(request, request.user.username, f"Hapus Customer: {customer.nama}")
                     customer.delete()
                     messages.add_message(request,messages.SUCCESS,'Hapus Customer Berhasil.')
             except:
@@ -466,7 +501,7 @@ def HeaderPinjam(request):
                 headerpinjam.is_closed=False
                 headerpinjam.is_process=False
                 headerpinjam.save()
-                write_log(request.user.username, f"Tambah Peminjaman: {customer.nama} | {tanggal_pinjam}")
+                write_log(request, request.user.username, f"Tambah Peminjaman: {customer.nama} | {tanggal_pinjam}")
                 messages.add_message(request,messages.SUCCESS,'Penambahan transaksi peminjaman berhasil. Silakan tambahkan detail barang.')
                 return redirect(f'/pinjam/detail/{headerpinjam.id}/')
             except Exception as ex:
@@ -496,7 +531,7 @@ def DetailPinjam(request,id):
             detail.lokasi = request.POST['lokasi']
             detail.tanggal_akhir = pinjaman.tanggal_pinjam + datetime.timedelta(days=365)
             detail.save()
-            write_log(request.user.username, f"Tambah Device ke Peminjaman: {device.nama_device} | ID {id}")
+            write_log(request, request.user.username, f"Tambah Device ke Peminjaman: {device.nama_device} | ID {id}")
             messages.add_message(request,messages.SUCCESS,'Device Berhasil Ditambahkan')
             device.is_out=True
             device.last_used=datetime.datetime.now().date()
@@ -526,7 +561,7 @@ def HapusItemDevice(request,id):
                 id_pinjam=detail.peminjaman.id
                 detail.device.is_out=False
                 detail.device.save()
-                write_log(request.user.username, f"Hapus Device dari Peminjaman: {detail.device.nama_device} | ID Pinjam {id_pinjam}")
+                write_log(request, request.user.username, f"Hapus Device dari Peminjaman: {detail.device.nama_device} | ID Pinjam {id_pinjam}")
                 detail.delete()
                 messages.add_message(request,messages.SUCCESS,'Hapus Device Berhasil.')
                 return redirect(f'/pinjam/detail/{id_pinjam}/')    
@@ -547,7 +582,7 @@ def ProsesPinjaman(request,id):
                 pinjaman = HeaderPeminjaman.objects.get(id=id)
                 pinjaman.is_process=True
                 pinjaman.save()
-                write_log(request.user.username, f"Proses Peminjaman: {pinjaman.customer} | {pinjaman.tanggal_pinjam}")
+                write_log(request, request.user.username, f"Proses Peminjaman: {pinjaman.customer} | {pinjaman.tanggal_pinjam}")
                 messages.add_message(request,messages.SUCCESS,'Peminjaman berhasil diproses.')
             except:
                 messages.add_message(request,messages.SUCCESS,'Peminjaman gagal diproses, silakan coba kembali...')
@@ -567,7 +602,7 @@ def HapusDraftPinjaman(request,id):
                 
                 jumlah_device = DetailPeminjaman.objects.filter(peminjaman=pinjaman).count()
                 if pinjaman.is_process != True or jumlah_device == 0:
-                    write_log(request.user.username, f"Hapus Peminjaman: {pinjaman.customer} | {pinjaman.tanggal_pinjam}")
+                    write_log(request, request.user.username, f"Hapus Peminjaman: {pinjaman.customer} | {pinjaman.tanggal_pinjam}")
                     pinjaman.delete()
                     messages.add_message(request,messages.SUCCESS,'Peminjaman berhasil dihapus.')
                 else:
@@ -588,14 +623,20 @@ def Ubahpassword(request):
         password_baru1 = request.POST['new_password1']
         password_baru2 = request.POST['new_password2']
 
-        if password_baru1 == password_baru2:
-            user = authenticate(username=request.user,password=password_baru1)
+        if len(password_baru1) < 8:
+            messages.add_message(request,messages.SUCCESS,'Password baru minimal 8 karakter.')
+        elif password_baru1 == password_baru2:
+            user = authenticate(username=request.user,password=password_lama)
             if user:
                 user.set_password(password_baru1)
+                user.save()
                 messages.add_message(request,messages.SUCCESS,'Password Berhasil Diubah Silakan login ulang.')
                 logout(request)
                 return redirect('/login/')
-        messages.add_message(request,messages.SUCCESS,'Password Belum berhasil diubah, silakan coba kembali.')
+            else:
+                messages.add_message(request,messages.SUCCESS,'Password lama tidak sesuai, silakan coba kembali.')
+        else:
+            messages.add_message(request,messages.SUCCESS,'Konfirmasi password tidak cocok, silakan coba kembali.')
     return redirect('/')
 
 def DaftarLog(request):
@@ -669,19 +710,21 @@ def ExportLogExcel(request):
                 ws.append([f'Periode: {label}'])
                 ws.append([])
 
-            ws.append(['No', 'Tanggal & Waktu', 'Pengguna', 'Keterangan'])
+            ws.append(['No', 'Tanggal & Waktu', 'Pengguna', 'Keterangan', 'IP Address'])
             for i, log in enumerate(logs, 1):
                 ws.append([
                     i,
                     log.tanggal.strftime('%d-%m-%Y %H:%M:%S'),
                     log.pengguna,
                     log.keterangan,
+                    log.ip_address or '-',
                 ])
 
             ws.column_dimensions['A'].width = 6
             ws.column_dimensions['B'].width = 22
             ws.column_dimensions['C'].width = 20
             ws.column_dimensions['D'].width = 60
+            ws.column_dimensions['E'].width = 18
 
             filename = f"log_transaksi_{date_from or 'all'}_{date_to or datetime.date.today()}.xlsx"
             response = HttpResponse(
@@ -706,7 +749,7 @@ def KembalikanDevice(request, id):
                 detail.save()
                 detail.device.is_out = False
                 detail.device.save()
-                write_log(request.user.username, f"Kembalikan Device: {detail.device.nama_device} | Pinjaman {id_pinjam}")
+                write_log(request, request.user.username, f"Kembalikan Device: {detail.device.nama_device} | Pinjaman {id_pinjam}")
                 # Cek apakah semua device sudah dikembalikan
                 semua_kembali = not DetailPeminjaman.objects.filter(
                     peminjaman=detail.peminjaman,
@@ -715,7 +758,7 @@ def KembalikanDevice(request, id):
                 if semua_kembali:
                     detail.peminjaman.is_closed = True
                     detail.peminjaman.save()
-                    write_log(request.user.username, f"Tutup Peminjaman: {detail.peminjaman.customer} | {detail.peminjaman.tanggal_pinjam}")
+                    write_log(request, request.user.username, f"Tutup Peminjaman: {detail.peminjaman.customer} | {detail.peminjaman.tanggal_pinjam}")
                 messages.add_message(request, messages.SUCCESS, 'Device berhasil dikembalikan.')
             except Exception as ex:
                 print(ex)
@@ -742,7 +785,7 @@ def PerpanjangDevice(request, id):
                     )
                     detail.tanggal_akhir = tgl_baru
                     detail.save()
-                    write_log(request.user.username, f"Perpanjang Device: {detail.device.nama_device} | s/d {tgl_baru}")
+                    write_log(request, request.user.username, f"Perpanjang Device: {detail.device.nama_device} | s/d {tgl_baru}")
                     messages.add_message(request, messages.SUCCESS, f'Perpanjangan device berhasil hingga {tgl_baru.strftime("%d/%m/%Y")}.')
                 except Exception as ex:
                     print(ex)
@@ -787,7 +830,7 @@ def GetNotifikasi(request):
     return JsonResponse({'count': 0, 'items': []})
 
 def Logout(request):
-    write_log(request.user.username, f"Logout")
+    write_log(request, request.user.username, f"Logout")
     logout(request)
     messages.add_message(request,messages.SUCCESS,"Anda berhasil Keluar.")
     return redirect('/login/')

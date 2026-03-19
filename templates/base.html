@@ -486,12 +486,28 @@
 
           <div class="mb-3">
             <label class="form-label">Password Baru</label>
-            <input type="password" name="new_password1" class="form-control" placeholder="Minimal 8 karakter" required>
+            <input type="password" name="new_password1" id="new_password1" class="form-control" placeholder="Minimal 8 karakter" minlength="8" required>
           </div>
 
           <div class="mb-3">
             <label class="form-label">Konfirmasi Password Baru</label>
-            <input type="password" name="new_password2" class="form-control" placeholder="Ulangi password baru" required>
+            <input type="password" name="new_password2" id="new_password2" class="form-control" placeholder="Ulangi password baru" minlength="8" required>
+          </div>
+
+          <!-- Hints / Info Status Password -->
+          <div id="hints_password" class="d-none">
+            <div id="hint_panjang" class="d-flex align-items-center gap-2 mb-1 d-none">
+              <i class="fa fa-times-circle text-danger"></i>
+              <small class="text-danger">Password minimal 8 karakter</small>
+            </div>
+            <div id="hint_cocok" class="d-flex align-items-center gap-2 mb-1 d-none">
+              <i class="fa fa-times-circle text-danger"></i>
+              <small class="text-danger">Password baru dan konfirmasi tidak sama</small>
+            </div>
+            <div id="hint_ok" class="d-flex align-items-center gap-2 mb-1 d-none">
+              <i class="fa fa-check-circle text-success"></i>
+              <small class="text-success">Password siap disimpan</small>
+            </div>
           </div>
 
         </div>
@@ -499,7 +515,7 @@
 
         <div class="modal-footer">
 
-          <button type="submit" class="btn btn-primary">
+          <button type="submit" class="btn btn-primary" id="btn_simpan_password" disabled>
             <i class="fa fa-save"></i> Simpan Password
           </button>
 
@@ -516,6 +532,76 @@
   </div>
 </div>
   <script>
+  document.addEventListener('DOMContentLoaded', function () {
+    var p1 = document.getElementById('new_password1');
+    var p2 = document.getElementById('new_password2');
+    var btnSimpan = document.getElementById('btn_simpan_password');
+    var hintsWrap = document.getElementById('hints_password');
+    var hintPanjang = document.getElementById('hint_panjang');
+    var hintCocok = document.getElementById('hint_cocok');
+    var hintOk = document.getElementById('hint_ok');
+
+    function updatePasswordStatus() {
+      if (!p1 || !p2) return;
+      var val1 = p1.value;
+      var val2 = p2.value;
+
+      // Tampilkan hints hanya jika salah satu field sudah diisi
+      if (val1.length === 0 && val2.length === 0) {
+        hintsWrap.classList.add('d-none');
+        btnSimpan.disabled = true;
+        return;
+      }
+
+      hintsWrap.classList.remove('d-none');
+
+      var kurang8 = val1.length < 8;
+      var tidakCocok = val1 !== val2;
+      var adaError = kurang8 || tidakCocok;
+
+      // Hint kurang dari 8 karakter
+      if (val1.length > 0 && kurang8) {
+        hintPanjang.classList.remove('d-none');
+      } else {
+        hintPanjang.classList.add('d-none');
+      }
+
+      // Hint konfirmasi tidak cocok (tampil jika konfirmasi sudah diisi)
+      if (val2.length > 0 && tidakCocok) {
+        hintCocok.classList.remove('d-none');
+      } else {
+        hintCocok.classList.add('d-none');
+      }
+
+      // Hint siap simpan
+      if (!adaError && val2.length >= 8) {
+        hintOk.classList.remove('d-none');
+      } else {
+        hintOk.classList.add('d-none');
+      }
+
+      // Aktif/nonaktif tombol
+      btnSimpan.disabled = adaError || val2.length === 0;
+    }
+
+    if (p1) p1.addEventListener('input', updatePasswordStatus);
+    if (p2) p2.addEventListener('input', updatePasswordStatus);
+
+    // Reset saat modal ditutup
+    var modalEl = document.getElementById('modalPassword');
+    if (modalEl) {
+      modalEl.addEventListener('hidden.bs.modal', function () {
+        if (p1) p1.value = '';
+        if (p2) p2.value = '';
+        hintsWrap.classList.add('d-none');
+        hintPanjang.classList.add('d-none');
+        hintCocok.classList.add('d-none');
+        hintOk.classList.add('d-none');
+        btnSimpan.disabled = true;
+      });
+    }
+  });
+
   function loadNotifikasi() {
     fetch('/notifikasi/')
       .then(r => r.json())

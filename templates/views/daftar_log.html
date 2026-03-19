@@ -132,6 +132,7 @@
             <th width="170">Tanggal & Waktu</th>
             <th>Pengguna</th>
             <th>Keterangan</th>
+            <th width="130">IP Address</th>
             <th width="100">Tipe</th>
           </tr>
         </thead>
@@ -143,6 +144,11 @@
             <td>{{ log.pengguna }}</td>
             <td>{{ log.keterangan }}</td>
             <td>
+              <span class="badge bg-secondary" style="font-size:11px;font-weight:normal;letter-spacing:0.3px;">
+                {{ log.ip_address|default:"-" }}
+              </span>
+            </td>
+            <td>
               {% if log.keterangan == 'Login' %}
                 <span class="badge-log badge-login">Login</span>
               {% elif log.keterangan == 'Logout' %}
@@ -153,7 +159,7 @@
             </td>
           </tr>
           {% empty %}
-          <tr><td colspan="5" class="text-center text-muted py-3">Tidak ada log pada rentang tanggal ini.</td></tr>
+          <tr><td colspan="6" class="text-center text-muted py-3">Tidak ada log pada rentang tanggal ini.</td></tr>
           {% endfor %}
         </tbody>
       </table>
