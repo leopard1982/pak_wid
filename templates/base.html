@@ -43,8 +43,36 @@
 
       /* MENU SCROLL AREA */
       .sidebar-menu {
-        height: calc(100vh - 120px);
+        height: calc(100vh - 120px - 62px);
         overflow-y: auto;
+      }
+
+      /* SIDEBAR FOOTER */
+      .sidebar-footer {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: linear-gradient(135deg, #051e4a, #0b3d91);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 10px 16px 14px;
+        border-top: 1px solid rgba(255,255,255,0.12);
+        gap: 2px;
+      }
+
+      .sidebar-footer .footer-copy {
+        font-size: 11px;
+        color: rgba(255,255,255,0.55);
+      }
+
+      .sidebar-footer .footer-app {
+        font-size: 12px;
+        font-weight: 600;
+        color: rgba(255,255,255,0.85);
+        letter-spacing: 0.3px;
       }
 
       /* SCROLLBAR */
@@ -105,6 +133,15 @@
         padding: 12px 20px;
         border-radius: 10px;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        position: fixed;
+        top: 20px;
+        left: 280px;
+        right: 20px;
+        z-index: 1000;
+      }
+
+      .main-content {
+        margin-top: 110px;
       }
 
       /* OVERLAY */
@@ -136,6 +173,54 @@
         .main {
           margin-left: 0;
         }
+
+        .topbar {
+          left: 10px;
+          right: 10px;
+          top: 10px;
+        }
+
+        .breadcrumb-bar {
+          left: 10px;
+          right: 10px;
+          top: 72px;
+        }
+      }
+
+      /* BREADCRUMB */
+      .breadcrumb-bar {
+        font-size: 12px;
+        position: fixed;
+        top: 82px;
+        left: 280px;
+        right: 20px;
+        z-index: 999;
+        background: #eef2f7;
+        padding: 6px 0 10px 0;
+        box-shadow: 0 6px 12px -4px rgba(0,0,0,0.08);
+      }
+
+      .breadcrumb-bar .breadcrumb {
+        background: none;
+        margin: 0;
+        padding: 0;
+      }
+
+      .breadcrumb-item a {
+        color: #1e5bb8;
+        text-decoration: none;
+      }
+
+      .breadcrumb-item a:hover {
+        text-decoration: underline;
+      }
+
+      .breadcrumb-item.active {
+        color: #666;
+      }
+
+      .breadcrumb-item + .breadcrumb-item::before {
+        color: #aaa;
       }
 
       /* ALERT */
@@ -221,26 +306,18 @@
           <a href="/pinjam/header/">
             <i class="fa fa-plus-circle"></i> Tambah Peminjaman </a>
         </div>
-        <div class="sidebar-title">SYSTEM</div>
-        <a href="#" class="menu-toggle">
-          <i class="fa fa-user-circle"></i> Profile <span class="float-end">
-            <i class="fa fa-caret-down"></i>
-          </span>
-        </a>
-        <div class="submenu">
-          <a href="#" data-bs-toggle="modal" data-bs-target="#modalPassword">
-            <i class="fa fa-key"></i> Ganti Password </a>
-          <a href="/logout/">
-            <i class="fa fa-sign-out"></i> Logout </a>
-        </div> {% if user.userprofile.role == 'super' %} <a href="#">
-          <i class="fa fa-tags"></i> Log History </a> {% endif %}
+      </div>
+      <div class="sidebar-footer">
+        {% now "Y" as current_year %}
+        <span class="footer-app">Management Device Application</span>
+        <span class="footer-copy">&copy; 2026{% if current_year != "2026" %} &ndash; {{ current_year }}{% endif %}</span>
       </div>
     </div>
     <!-- OVERLAY -->
     <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
     <!-- MAIN -->
     <div class="main">
-      <div class="topbar mb-4 d-flex justify-content-between align-items-center">
+      <div class="topbar d-flex justify-content-between align-items-center">
         <button class="btn btn-outline-primary d-md-none" onclick="toggleSidebar()">
           <i class="fa fa-bars"></i>
         </button>
@@ -248,11 +325,70 @@
           <i class="fa fa-server"></i>
           <b>{{menu}}</b>
         </h5>
-        <div class="d-none d-xl-block">
-          <i class="fa fa-user-circle"></i>
-          {{user.userprofile.nama_lengkap|truncatechars:15}}
+        <div class="dropdown">
+          <a href="#" class="d-flex align-items-center gap-2 text-decoration-none text-dark dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+            <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center text-white fw-bold"
+              style="width:36px;height:36px;font-size:14px;flex-shrink:0;">
+              {{ user.userprofile.nama_lengkap|slice:":1"|upper }}
+            </div>
+            <div class="d-none d-md-block lh-sm">
+              <div style="font-size:13px;font-weight:600;">{{ user.userprofile.nama_lengkap|truncatechars:20 }}</div>
+              <div style="font-size:11px;color:#888;">
+                {% if user.userprofile.role == 'super' %}Super Admin
+                {% elif user.userprofile.role == 'admin' %}Administrator
+                {% elif user.userprofile.role == 'viewer' %}Pengguna
+                {% else %}{{ user.userprofile.role|capfirst }}{% endif %}
+              </div>
+            </div>
+          </a>
+          <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-2" style="min-width:180px;">
+            <li>
+              <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#modalPassword">
+                <i class="fa fa-key me-2 text-secondary"></i> Ganti Password
+              </a>
+            </li>
+            {% if user.userprofile.role == 'super' %}
+            <li>
+              <a class="dropdown-item" href="#">
+                <i class="fa fa-tags me-2 text-secondary"></i> Log History
+              </a>
+            </li>
+            {% endif %}
+            <li><hr class="dropdown-divider"></li>
+            <li>
+              <a class="dropdown-item text-danger" href="/logout/">
+                <i class="fa fa-sign-out me-2"></i> Logout
+              </a>
+            </li>
+          </ul>
         </div>
-      </div> {% block contents %} {% include 'views/dashboard.html'%} {% endblock %}
+      </div>
+      <div class="main-content">
+        <!-- BREADCRUMB -->
+        <nav class="breadcrumb-bar" aria-label="breadcrumb">
+          <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+              <a href="/"><i class="fa fa-home"></i> Home</a>
+            </li>
+            {% if id == 1 %}
+              <li class="breadcrumb-item"><a href="/device/list/">Devices</a></li>
+              <li class="breadcrumb-item active">{{ menu }}</li>
+            {% elif id == 2 %}
+              <li class="breadcrumb-item"><a href="/customer/list/">Customer</a></li>
+              <li class="breadcrumb-item active">{{ menu }}</li>
+            {% elif id == 3 %}
+              <li class="breadcrumb-item"><a href="/pinjam/list/">Peminjaman</a></li>
+              <li class="breadcrumb-item active">{{ menu }}</li>
+            {% elif id == 5 %}
+              <li class="breadcrumb-item"><a href="/user/list/">Pengguna</a></li>
+              <li class="breadcrumb-item active">{{ menu }}</li>
+            {% else %}
+              <li class="breadcrumb-item active">{{ menu }}</li>
+            {% endif %}
+          </ol>
+        </nav>
+        {% block contents %} {% include 'views/dashboard.html'%} {% endblock %}
+      </div>
     </div>
     <script>
       function toggleSidebar() {

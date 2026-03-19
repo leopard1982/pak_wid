@@ -46,33 +46,69 @@
     background: linear-gradient(135deg, #f39c12, #f5b041);
     }
 
+    /* Shine effect */
+    @keyframes shine {
+      0%   { left: -100%; opacity: 0; }
+      10%  { opacity: 1; }
+      50%  { left: 130%; opacity: 1; }
+      51%, 100% { left: 130%; opacity: 0; }
+    }
+
+    .card-stat::after {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -100%;
+      width: 60%;
+      height: 200%;
+      background: linear-gradient(
+        105deg,
+        transparent 30%,
+        rgba(255,255,255,0.35) 50%,
+        transparent 70%
+      );
+      transform: skewX(-15deg);
+      animation: shine 15s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    .card-blue  { }
+    .card-green::after { animation-delay: 5s; }
+    .card-orange::after { animation-delay: 10s; }
+
 </style>
 {% endblock %}
 <!-- CARDS -->
 <div class="row mb-4">
     <div class="col-md-4 mb-3">
-        <div class="card card-stat card-blue p-3">
+        <a href="/device/list/" class="text-decoration-none">
+        <div class="card card-stat card-blue p-3" style="cursor:pointer;">
             <h6>
                 <i class="fa fa-desktop"></i> Total Devices
             </h6>
             <h3>{{jml_ok}}</h3>
         </div>
+        </a>
     </div>
     <div class="col-md-4 mb-3">
-        <div class="card card-stat card-green p-3">
+        <a href="/device/list/" class="text-decoration-none">
+        <div class="card card-stat card-green p-3" style="cursor:pointer;">
         <h6>
             <i class="fa fa-check-circle"></i> Device Ready
         </h6>
         <h3>{{jml_available}}</h3>
         </div>
+        </a>
     </div>
     <div class="col-md-4 mb-3">
-        <div class="card card-stat card-orange p-3">
+        <a href="/customer/list/" class="text-decoration-none">
+        <div class="card card-stat card-orange p-3" style="cursor:pointer;">
         <h6>
             <i class="fa fa-users"></i> Total Customer
         </h6>
         <h3>{{jml_customer}}</h3>
         </div>
+        </a>
     </div>
     </div>
     <!-- DEVICE TABLE -->

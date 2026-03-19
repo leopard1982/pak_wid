@@ -52,7 +52,7 @@ def Login(request):
 def DaftarPengguna(request):
     if request.user.is_authenticated:
         if request.user.userprofile.role == "super":
-            users = User.objects.all()
+            users = User.objects.select_related('userprofile').all()
             context = {
                 'menu':'Daftar Pengguna',
                 'id':5,
@@ -335,7 +335,7 @@ def DaftarCustomer(request):
 
 def DaftarPinjam(request):
     if request.user.is_authenticated:
-        pinjaman = HeaderPeminjaman.objects.all()
+        pinjaman = HeaderPeminjaman.objects.select_related('customer').all()
         context = {
             'menu':'Daftar Pinjaman',
             'id':3,
@@ -405,7 +405,7 @@ def DetailPinjam(request,id):
         pinjaman = HeaderPeminjaman.objects.get(id=id)   
         devices = MasterDevice.objects.all().filter(Q(is_out=False) & Q(is_ok=True))
         tanggal_akhir = pinjaman.tanggal_pinjam + datetime.timedelta(days=365)
-        details = DetailPeminjaman.objects.all().filter(peminjaman=pinjaman)
+        details = DetailPeminjaman.objects.select_related('device').filter(peminjaman=pinjaman)
         context = {
             'menu':'Detail Pinjam',
             'id':3,
@@ -422,7 +422,7 @@ def HapusItemDevice(request,id):
     if request.user.is_authenticated:
         if request.user.userprofile.role == "super" or request.user.userprofile.role == "admin":     
             try:
-                detail = DetailPeminjaman.objects.get(id=id)
+                detail = DetailPeminjaman.objects.select_related('device', 'peminjaman').get(id=id)
                 id_pinjam=detail.peminjaman.id
                 detail.device.is_out=False
                 detail.device.save()
