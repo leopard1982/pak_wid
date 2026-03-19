@@ -53,7 +53,7 @@
     <form method="POST"> {% csrf_token %} <div class="row">
         <div class="col-md-6 mb-3">
           <label class="form-label">Tanggal Pinjam</label>
-          <input type="date" name="tanggal_pinjam" class="form-control" required max="{% now 'Y-m-d' %}">
+          <input type="text" name="tanggal_pinjam" class="form-control date-picker" required data-maxdate="{% now 'Y-m-d' %}" placeholder="dd/mm/yyyy">
         </div>
         <div class="col-md-6 mb-3">
           <label class="form-label">Customer</label>

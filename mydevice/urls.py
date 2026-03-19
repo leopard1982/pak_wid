@@ -4,6 +4,7 @@ from .views import Dashboard, Login, TambahPengguna, TambahDevice, TambahCustome
 from .views import DetailPinjam,DaftarDevice, DaftarCustomer,DaftarPengguna,DaftarPinjam
 from .views import EditDevice, HapusDevice,Logout, EditPengguna, HapusPengguna, EditCustomer
 from .views import HapusCustomer, HapusItemDevice, ProsesPinjaman, HapusDraftPinjaman,Ubahpassword
+from .views import DaftarLog, ExportLogExcel
 
 
 urlpatterns = [
@@ -28,5 +29,7 @@ urlpatterns = [
     path('pinjam/proses/<str:id>/', ProsesPinjaman, name="proses_pinjam"),
     path('pinjam/hapus/<str:id>/', HapusDraftPinjaman, name="hapus_draft_pinjam"),
     path('pinjam/detail/del/<str:id>/',HapusItemDevice,name="hapus_item_device"),
-    path('logout/',Logout,name="logout")
+    path('logout/',Logout,name="logout"),
+    path('log/list/', DaftarLog, name="daftar_log"),
+    path('log/export/', ExportLogExcel, name="export_log"),
 ]
