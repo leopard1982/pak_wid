@@ -4,6 +4,8 @@
 
 <!-- DATATABLE CSS -->
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+<!-- DATATABLE BUTTONS CSS -->
+<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.bootstrap5.min.css">
 
 <style>
   body {
@@ -45,11 +47,34 @@
     padding: 6px 10px;
   }
 
+  /* CARD STAT */
+  .card-stat {
+    border: none;
+    border-radius: 14px;
+    color: white;
+    overflow: hidden;
+    transition: transform 0.2s ease;
+  }
+  .card-stat:hover { transform: translateY(-2px); }
+  .card-stat h6  { font-size: 13px; font-weight: 600; opacity: 0.9; }
+  .card-stat h3  { font-size: 28px; font-weight: bold; margin-top: 6px; margin-bottom: 0; }
+  .card-stat i   { font-size: 20px; margin-right: 6px; }
+  .cs-total   { background: linear-gradient(135deg, #1a3a6e 0%, #2471a3 60%, #5dade2 100%); box-shadow: 0 8px 20px rgba(26,58,110,0.28); }
+  .cs-ongoing { background: linear-gradient(135deg, #6e3b00 0%, #d68910 60%, #f8c471 100%); box-shadow: 0 8px 20px rgba(110,59,0,0.28); }
+  .cs-selesai { background: linear-gradient(135deg, #145a32 0%, #1e8449 60%, #52be80 100%); box-shadow: 0 8px 20px rgba(20,90,50,0.28); }
+
   /* MOBILE */
   @media(max-width:768px) {
     .main {
       margin-left: 0;
     }
+  }
+
+  /* PRINT STYLES */
+  @media print {
+    .sidebar, .topbar, .no-print { display: none !important; }
+    .main { margin-left: 0 !important; padding: 0 !important; }
+    body { background: white !important; }
   }
 </style>
 
@@ -59,23 +84,73 @@
 
 {% block contents %}
 
+<!-- SUMMARY CARDS -->
+<div class="row mb-4">
+  <div class="col-12 col-md-4 mb-3">
+    <div class="card card-stat cs-total p-3">
+      <h6><i class="fa fa-exchange"></i> Total Pinjaman {{ tahun }}</h6>
+      <h3>{{ total_tahun }}</h3>
+    </div>
+  </div>
+  <div class="col-12 col-md-4 mb-3">
+    <div class="card card-stat cs-ongoing p-3">
+      <h6><i class="fa fa-clock-o"></i> On Going {{ tahun }}</h6>
+      <h3>{{ total_ongoing }}</h3>
+    </div>
+  </div>
+  <div class="col-12 col-md-4 mb-3">
+    <div class="card card-stat cs-selesai p-3">
+      <h6><i class="fa fa-check-circle"></i> Selesai {{ tahun }}</h6>
+      <h3>{{ total_selesai }}</h3>
+    </div>
+  </div>
+</div>
+
 <div class="card form-card shadow-sm">
 
-  <div class="card-header d-flex justify-content-between align-items-center">
+  <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
 
     <h6 class="mb-0">
       <i class="fa fa-exchange"></i> Daftar Peminjaman
     </h6>
 
-    <a href="/pinjam/header/" class="btn btn-primary btn-sm">
-      <i class="fa fa-plus"></i> Tambah Peminjaman
-    </a>
+    <div class="d-flex flex-wrap gap-2">
+      <button id="btnExcel" class="btn btn-success btn-sm">
+        <i class="fa fa-file-excel-o"></i> Export Excel
+      </button>
+      <button id="btnPrint" class="btn btn-secondary btn-sm">
+        <i class="fa fa-print"></i> Cetak Laporan
+      </button>
+      <a href="/pinjam/header/" class="btn btn-primary btn-sm">
+        <i class="fa fa-plus"></i> Tambah Peminjaman
+      </a>
+    </div>
 
   </div>
 
 
 
   <div class="card-body">
+
+    <!-- FILTER TANGGAL -->
+    <div class="row mb-3 align-items-end">
+      <div class="col-12 col-md-4 mb-2">
+        <label class="form-label fw-bold mb-1" style="font-size:13px;"><i class="fa fa-calendar"></i> Dari Tanggal</label>
+        <input type="text" id="filterDari" class="form-control form-control-sm date-picker" placeholder="dd/mm/yyyy">
+      </div>
+      <div class="col-12 col-md-4 mb-2">
+        <label class="form-label fw-bold mb-1" style="font-size:13px;"><i class="fa fa-calendar"></i> Sampai Tanggal</label>
+        <input type="text" id="filterSampai" class="form-control form-control-sm date-picker" placeholder="dd/mm/yyyy">
+      </div>
+      <div class="col-12 col-md-4 mb-2 d-flex gap-2">
+        <button id="btnFilter" class="btn btn-primary btn-sm">
+          <i class="fa fa-filter"></i> Filter
+        </button>
+        <button id="btnReset" class="btn btn-outline-secondary btn-sm">
+          <i class="fa fa-times"></i> Reset
+        </button>
+      </div>
+    </div>
 
     <div class="table-responsive">
 
@@ -86,8 +161,10 @@
             <th width="60">No</th>
             <th>ID Transaksi</th>
             <th>Tanggal Pinjam</th>
+            <th>Tgl Pengembalian</th>
             <th>Customer</th>
             <th>Keterangan</th>
+            <th width="80">Jml Device</th>
             <th>Status</th>
             <th width="150">Action</th>
           </tr>
@@ -101,30 +178,43 @@
 
           <td>{{ forloop.counter }}</td>
 
-          <td>{{ p.id|truncatechars:8 }}</td>
+          <td data-export="{{ p.id }}">
+            <div class="text-monospace" style="font-size:12px;">{{ p.id|truncatechars:8 }}</div>
+            <button type="button" class="btn btn-outline-secondary btn-copy mt-1"
+                    style="font-size:10px;padding:1px 6px;"
+                    data-id="{{ p.id }}" title="Copy ID Transaksi">
+              <i class="fa fa-copy"></i> copy
+            </button>
+          </td>
 
           <td>{{ p.tanggal_pinjam|date:"d/m/Y" }}</td>
+
+          <td data-export="{% if p.tgl_kembali %}{{ p.tgl_kembali|date:'d/m/Y' }}{% else %}-{% endif %}">
+            {% if p.tgl_kembali %}
+              {{ p.tgl_kembali|date:"d/m/Y" }}
+            {% else %}
+              <span class="text-muted">-</span>
+            {% endif %}
+          </td>
 
           <td>{{ p.customer.nama }}</td>
 
           <td>{{ p.keterangan }}</td>
 
-          <td>
+          <td class="text-center">
+            <span class="badge bg-primary">{{ p.jumlah_device }}</span>
+          </td>
 
+          <td data-export="{% if p.is_closed %}Selesai{% else %}On Going{% endif %}">
             {% if p.is_closed %}
-
             <span class="badge bg-success badge-status">
-              <i class="fa fa-check"></i> Closed
+              <i class="fa fa-check"></i> Selesai
             </span>
-
             {% else %}
-
             <span class="badge bg-warning badge-status">
-              <i class="fa fa-clock-o"></i> Open
+              <i class="fa fa-clock-o"></i> On Going
             </span>
-
             {% endif %}
-
           </td>
 
           <td>
@@ -137,14 +227,22 @@
               <i class="fa fa-edit"></i>
             </a>
             {% endif %}
-            <a {% if p.is_process %}href="#" class="btn btn-secondary btn-sm m-1"{%else%}href="/pinjam/hapus/{{p.id}}/" class="btn btn-danger btn-sm m-1"{%endif %}>
-                <i class="fa fa-trash"></i>
-            </a>
-            
+            {% if not p.is_process or p.jumlah_device == 0 %}
+            <button type="button" class="btn btn-danger btn-sm m-1"
+                    data-bs-toggle="modal" data-bs-target="#modalKonfirmasi"
+                    data-url="/pinjam/hapus/{{p.id}}/"
+                    data-pesan="Hapus peminjaman customer <strong>{{ p.customer.nama }}</strong> tanggal {{ p.tanggal_pinjam|date:'d/m/Y' }}?"
+                    data-color="danger" data-label="Hapus">
+              <i class="fa fa-trash"></i>
+            </button>
+            {% else %}
+            <button type="button" class="btn btn-secondary btn-sm m-1" disabled title="Tidak bisa dihapus, sudah ada device aktif">
+              <i class="fa fa-trash"></i>
+            </button>
+            {% endif %}
           </td>
 
         </tr>
-        
 
         {% endfor %}
 
@@ -159,25 +257,305 @@
 </div>
 
 
+<!-- MODAL KONFIRMASI -->
+<div class="modal fade" id="modalKonfirmasi" tabindex="-1">
+  <div class="modal-dialog modal-sm">
+    <div class="modal-content">
+      <div class="modal-header" id="konfirmasiHeader">
+        <h5 class="modal-title"><i class="fa fa-exclamation-triangle"></i> Konfirmasi</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body text-center py-4">
+        <p class="mb-0" id="konfirmasiPesan"></p>
+      </div>
+      <div class="modal-footer justify-content-center">
+        <a href="#" id="konfirmasiYa" class="btn btn-danger">
+          <i class="fa fa-check"></i> <span id="konfirmasiLabel">Ya</span>
+        </a>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          <i class="fa fa-times"></i> Batal
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
 <!-- DATATABLE JS -->
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+<!-- DATATABLE BUTTONS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.bootstrap5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
+
 <script>
+// MODAL KONFIRMASI
+var modalKonfirmasi = document.getElementById('modalKonfirmasi');
+if (modalKonfirmasi) {
+  modalKonfirmasi.addEventListener('show.bs.modal', function(e) {
+    var btn = e.relatedTarget;
+    document.getElementById('konfirmasiPesan').innerHTML = btn.dataset.pesan;
+    document.getElementById('konfirmasiYa').href = btn.dataset.url;
+    document.getElementById('konfirmasiLabel').textContent = btn.dataset.label || 'Ya';
+    var color = btn.dataset.color || 'danger';
+    document.getElementById('konfirmasiHeader').className = 'modal-header bg-' + color + ' text-white';
+    document.getElementById('konfirmasiYa').className = 'btn btn-' + color;
+  });
+}
+
+// COPY TO CLIPBOARD
+document.querySelectorAll('.btn-copy').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    var id = this.dataset.id;
+    navigator.clipboard.writeText(id).then(function() {
+      var icon = btn.querySelector('i');
+      icon.className = 'fa fa-check text-success';
+      btn.classList.add('btn-outline-success');
+      btn.classList.remove('btn-outline-secondary');
+      setTimeout(function() {
+        icon.className = 'fa fa-copy';
+        btn.classList.remove('btn-outline-success');
+        btn.classList.add('btn-outline-secondary');
+      }, 1500);
+    });
+  });
+});
+
+// FILTER TANGGAL
+// Kolom Tanggal Pinjam tampil sebagai dd/mm/yyyy → parse ke Date
+function parseDMY(str) {
+  if (!str) return null;
+  var s = str.trim();
+  var p = s.split('/');
+  if (p.length === 3) return new Date(+p[2], +p[1] - 1, +p[0]);
+  // Fallback: coba parse yyyy-mm-dd (nilai internal flatpickr)
+  var q = s.split('-');
+  if (q.length === 3) return new Date(+q[0], +q[1] - 1, +q[2]);
+  return null;
+}
+
+function getFpDate(inputId) {
+  var el = document.getElementById(inputId);
+  if (!el) return null;
+  if (el._flatpickr && el._flatpickr.selectedDates.length) {
+    var d = el._flatpickr.selectedDates[0];
+    return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  }
+  return parseDMY(el.value);
+}
+
+// Custom search: filter kolom Tanggal Pinjam (index 2)
+$.fn.dataTable.ext.search.push(function(settings, data) {
+  if (settings.nTable.id !== 'tablePinjaman') return true;
+  var dari    = getFpDate('filterDari');
+  var sampai  = getFpDate('filterSampai');
+  if (!dari && !sampai) return true;
+  var tglBaris = parseDMY(data[2]);
+  if (!tglBaris) return true;
+  if (dari   && tglBaris < dari)   return false;
+  if (sampai && tglBaris > sampai) return false;
+  return true;
+});
+
+// DATATABLE
+var table;
 $(document).ready(function(){
-  $('#tablePinjaman').DataTable({
+  table = $('#tablePinjaman').DataTable({
     pageLength: 10,
     lengthMenu: [5,10,25,50],
+    columnDefs: [
+      {
+        targets: 1,
+        render: function(data, type, row, meta) {
+          if (type === 'filter' || type === 'sort') {
+            return $(meta.settings.aoData[meta.row].nTr).find('td').eq(1).data('export') || data;
+          }
+          return data;
+        }
+      }
+    ],
     language: {
       search: "Cari Peminjaman:",
+      searchPlaceholder: "Cari customer, keterangan, tanggal...",
       lengthMenu: "Tampilkan _MENU_ data",
-      info: "Menampilkan _START_ to _END_ of _TOTAL_ Devices",
-      paginate: {
-        previous: "Prev",
-        next: "Next"
+      info: "Menampilkan _START_ to _END_ of _TOTAL_ peminjaman",
+      paginate: { previous: "Prev", next: "Next" }
+    },
+    buttons: [
+      {
+        extend: 'excel',
+        text: 'Excel',
+        exportOptions: {
+          columns: [0, 1, 2, 3, 4, 5, 6, 7],
+          rows: { search: 'applied' },
+          format: {
+            body: function(data, row, column, node) {
+              var exportVal = $(node).data('export');
+              if (exportVal !== undefined) return exportVal;
+              return $('<div>').html(data).text().trim();
+            }
+          }
+        },
+        customize: function(xlsx) {
+          var sheet = xlsx.xl.worksheets['sheet1.xml'];
+          $('row:first c', sheet).attr('s', '2');
+        }
       }
-    }
+    ]
   });
+
+  // Tombol Filter
+  $('#btnFilter').on('click', function() { table.draw(); });
+
+  // Tombol Reset
+  $('#btnReset').on('click', function() {
+    $('#filterDari').val('');
+    $('#filterSampai').val('');
+    if ($('#filterDari')[0]._flatpickr) $('#filterDari')[0]._flatpickr.clear();
+    if ($('#filterSampai')[0]._flatpickr) $('#filterSampai')[0]._flatpickr.clear();
+    table.draw();
+  });
+
+  // Tombol Export Excel — set title dinamis lalu trigger
+  $('#btnExcel').on('click', function() {
+    var dari   = $('#filterDari').val();
+    var sampai = $('#filterSampai').val();
+    var periodeLabel = (dari || sampai)
+      ? (dari || '...') + ' s/d ' + (sampai || '...')
+      : 'Tahun {{ tahun }}';
+    table.button(0).action(function(e, dt, node, config) {
+      config.title    = 'Laporan Peminjaman — ' + periodeLabel;
+      config.filename = 'laporan_peminjaman_' + periodeLabel.replace(/\//g, '-').replace(/ /g, '_');
+      $.fn.dataTable.ext.buttons.excelHtml5.action.call(this, e, dt, node, config);
+    });
+    table.button(0).trigger();
+    // Kembalikan action ke default setelah trigger
+    setTimeout(function() { table.button(0).action(null); }, 500);
+  });
+});
+
+// CETAK LAPORAN
+$('#btnPrint').on('click', function() {
+  var dari   = $('#filterDari').val();
+  var sampai = $('#filterSampai').val();
+  var periodeLabel = (dari || sampai)
+    ? (dari || '...') + ' s/d ' + (sampai || '...')
+    : 'Tahun {{ tahun }}';
+
+  var rows = '';
+  var allData = table.rows({ search: 'applied' }).nodes();
+  var no = 1;
+  var cntOngoing = 0, cntSelesai = 0;
+
+  $(allData).each(function() {
+    var tds = $(this).find('td');
+    var id         = $(tds[1]).data('export') || $(tds[1]).find('span').first().text().trim();
+    var tgl        = $(tds[2]).text().trim();
+    var tglKembali = $(tds[3]).data('export') || $(tds[3]).text().trim();
+    var cust       = $(tds[4]).text().trim();
+    var ket        = $(tds[5]).text().trim();
+    var jmlDevice  = $(tds[6]).text().trim();
+    var status     = $(tds[7]).data('export') || $(tds[7]).text().trim();
+    if (status === 'Selesai') cntSelesai++; else cntOngoing++;
+    var badgeClass = status === 'Selesai'
+      ? 'background:#1e8449;color:white;'
+      : 'background:#d68910;color:white;';
+    var kembaliCell = tglKembali === '-'
+      ? '<span style="color:#aaa;">-</span>'
+      : '<span style="padding:3px 8px;border-radius:4px;font-size:11px;background:#1e8449;color:white;">' + tglKembali + '</span>';
+
+    rows += '<tr>' +
+      '<td>' + no++ + '</td>' +
+      '<td style="font-family:monospace;font-size:11px;">' + id + '</td>' +
+      '<td>' + tgl + '</td>' +
+      '<td>' + kembaliCell + '</td>' +
+      '<td>' + cust + '</td>' +
+      '<td>' + ket + '</td>' +
+      '<td style="text-align:center;">' + jmlDevice + '</td>' +
+      '<td><span style="padding:3px 8px;border-radius:4px;font-size:11px;' + badgeClass + '">' + status + '</span></td>' +
+    '</tr>';
+  });
+
+  var totalRows = table.rows({ search: 'applied' }).count();
+  var now = new Date();
+  var printDate = now.toLocaleDateString('id-ID', { day:'2-digit', month:'long', year:'numeric' });
+  var printTime = now.toLocaleTimeString('id-ID', { hour:'2-digit', minute:'2-digit' });
+
+  var win = window.open('', '_blank', 'width=1100,height=750');
+  win.document.write(`<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Laporan Peminjaman — ${periodeLabel}</title>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family: Arial, sans-serif; font-size: 12px; color: #222; padding: 30px; }
+    .header { text-align: center; border-bottom: 2px solid #0b3d91; padding-bottom: 12px; margin-bottom: 20px; }
+    .header h2 { font-size: 18px; color: #0b3d91; margin-bottom: 4px; }
+    .header h3 { font-size: 14px; font-weight: normal; color: #444; }
+    .header .print-info { font-size: 11px; color: #888; margin-top: 6px; }
+    .summary { display: flex; gap: 16px; margin-bottom: 20px; }
+    .summary-item { flex: 1; border: 1px solid #ddd; border-radius: 6px; padding: 10px 14px; text-align: center; }
+    .summary-item .lbl { font-size: 11px; color: #777; margin-bottom: 4px; }
+    .summary-item .val { font-size: 22px; font-weight: bold; }
+    table { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
+    thead tr { background: #0b3d91; color: white; }
+    thead th { padding: 8px 10px; text-align: left; font-size: 12px; }
+    tbody tr:nth-child(even) { background: #f5f7fb; }
+    tbody td { padding: 7px 10px; border-bottom: 1px solid #e5e5e5; vertical-align: middle; }
+    .footer { text-align: right; font-size: 11px; color: #888; border-top: 1px solid #ddd; padding-top: 10px; margin-top: 10px; }
+    @media print {
+      body { padding: 15px; }
+      @page { margin: 1cm; size: A4 landscape; }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h2>LAPORAN PEMINJAMAN DEVICE</h2>
+    <h3>Periode: ${periodeLabel}</h3>
+    <div class="print-info">Dicetak pada: ${printDate}, ${printTime}</div>
+  </div>
+
+  <div class="summary">
+    <div class="summary-item">
+      <div class="lbl">Total Ditampilkan</div>
+      <div class="val" style="color:#0b3d91;">${totalRows}</div>
+    </div>
+    <div class="summary-item">
+      <div class="lbl">On Going</div>
+      <div class="val" style="color:#d68910;">${cntOngoing}</div>
+    </div>
+    <div class="summary-item">
+      <div class="lbl">Selesai</div>
+      <div class="val" style="color:#1e8449;">${cntSelesai}</div>
+    </div>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th width="40">No</th>
+        <th width="190">ID Transaksi</th>
+        <th width="95">Tgl Pinjam</th>
+        <th width="95">Tgl Kembali</th>
+        <th>Customer</th>
+        <th>Keterangan</th>
+        <th width="50">Jml</th>
+        <th width="80">Status</th>
+      </tr>
+    </thead>
+    <tbody>${rows}</tbody>
+  </table>
+
+  <div class="footer">Total ${totalRows} transaksi &nbsp;|&nbsp; Device Manager System</div>
+
+  <script>window.onload = function() { window.print(); }<\/script>
+</body>
+</html>`);
+  win.document.close();
 });
 </script>
 

@@ -110,6 +110,7 @@
             <th>Alamat</th>
             <th>Telpon</th>
             <th>Kontak Person</th>
+            <th>Catatan</th>
             {% if user.userprofile.role != "viewer" %}<th width="120">Action</th> {% endif %}
           </tr>
         </thead>
@@ -121,6 +122,7 @@
             <td>{{ c.alamat }}</td>
             <td>{{ c.telpon }}</td>
             <td>{{ c.kontak_person }}</td>
+            <td>{{ c.catatan|default:"-" }}</td>
             {% if user.userprofile.role != "viewer" %}
               <td>
                 <a href="/customer/edit/{{c.id}}/" class="btn btn-warning btn-sm m-1">
@@ -131,10 +133,13 @@
                     <i class="fa fa-trash"></i>
                   </button>
                 {% else %}
-                  <a href="/customer/del/{{c.id}}/" class="btn btn-danger btn-sm m-1"
-                     onclick="return confirm('Hapus customer {{ c.nama }}?')">
+                  <button type="button" class="btn btn-danger btn-sm m-1"
+                          data-bs-toggle="modal" data-bs-target="#modalKonfirmasi"
+                          data-url="/customer/del/{{c.id}}/"
+                          data-pesan="Hapus customer <strong>{{ c.nama }}</strong>? Tindakan ini tidak dapat dibatalkan."
+                          data-color="danger" data-label="Hapus">
                     <i class="fa fa-trash"></i>
-                  </a>
+                  </button>
                 {% endif %}
               </td>
             {% endif %}
@@ -146,6 +151,29 @@
   </div>
 </div>
 
+<!-- MODAL KONFIRMASI -->
+<div class="modal fade" id="modalKonfirmasi" tabindex="-1">
+  <div class="modal-dialog modal-sm">
+    <div class="modal-content">
+      <div class="modal-header" id="konfirmasiHeader">
+        <h5 class="modal-title"><i class="fa fa-exclamation-triangle"></i> Konfirmasi</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body text-center py-4">
+        <p class="mb-0" id="konfirmasiPesan"></p>
+      </div>
+      <div class="modal-footer justify-content-center">
+        <a href="#" id="konfirmasiYa" class="btn btn-danger">
+          <i class="fa fa-check"></i> <span id="konfirmasiLabel">Ya</span>
+        </a>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          <i class="fa fa-times"></i> Batal
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- JQUERY -->
 <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
 <!-- DATATABLE JS -->
@@ -153,14 +181,28 @@
 <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
 
 <script>
+var modalKonfirmasi = document.getElementById('modalKonfirmasi');
+if (modalKonfirmasi) {
+  modalKonfirmasi.addEventListener('show.bs.modal', function(e) {
+    var btn = e.relatedTarget;
+    document.getElementById('konfirmasiPesan').innerHTML = btn.dataset.pesan;
+    document.getElementById('konfirmasiYa').href = btn.dataset.url;
+    document.getElementById('konfirmasiLabel').textContent = btn.dataset.label || 'Ya';
+    var color = btn.dataset.color || 'danger';
+    document.getElementById('konfirmasiHeader').className = 'modal-header bg-' + color + ' text-white';
+    document.getElementById('konfirmasiYa').className = 'btn btn-' + color;
+  });
+}
+
 $(document).ready(function(){
   $('#tableCustomer').DataTable({
     pageLength: 10,
     lengthMenu: [5,10,25,50],
     language: {
-      search: "Search Customer:",
-      lengthMenu: "Show _MENU_ data",
-      info: "Showing _START_ to _END_ of _TOTAL_ customers",
+      search: "Cari Customer:",
+      searchPlaceholder: "Cari nama, alamat, telepon...",
+      lengthMenu: "Tampilkan _MENU_ data",
+      info: "Menampilkan _START_ to _END_ of _TOTAL_ customer",
       paginate: {
         previous: "Prev",
         next: "Next"

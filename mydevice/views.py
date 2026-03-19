@@ -8,7 +8,7 @@ from django.core.paginator import Paginator
 from django.http import HttpResponse
 import datetime
 import openpyxl
-from django.db.models import Q, Count
+from django.db.models import Q, Count, Max
 
 def write_log(pengguna, keterangan):
     LogLogin.objects.create(pengguna=pengguna, keterangan=keterangan)
@@ -335,10 +335,11 @@ def EditCustomer(request,id):
         if request.user.userprofile.role == "super" or request.user.userprofile.role == "admin":
             try:
                 if request.method == "POST":
-                    customer = MasterCustomer.objects.get(id=id)                    
+                    customer = MasterCustomer.objects.get(id=id)
                     customer.alamat = request.POST['alamat']
                     customer.telpon = request.POST['telpon']
-                    customer.kontak_person = request.POST['kontak_person']                    
+                    customer.kontak_person = request.POST['kontak_person']
+                    customer.catatan = request.POST.get('catatan', '')
                     customer.save()
                     write_log(request.user.username, f"Edit Customer: {customer.nama}")
                     messages.add_message(request,messages.SUCCESS,'Update Customer Berhasil Dilakukan.')
@@ -420,11 +421,23 @@ def DaftarCustomer(request):
 
 def DaftarPinjam(request):
     if request.user.is_authenticated:
-        pinjaman = HeaderPeminjaman.objects.select_related('customer').all()
+        pinjaman = HeaderPeminjaman.objects.select_related('customer').annotate(
+            tgl_kembali=Max('Detail_Peminjam__tanggal_dikembalikan'),
+            jumlah_device=Count('Detail_Peminjam')
+        ).all()
+        tahun = datetime.datetime.now().year
+        pinjaman_tahun = pinjaman.filter(tanggal_pinjam__year=tahun)
+        total_tahun    = pinjaman_tahun.count()
+        total_selesai  = pinjaman_tahun.filter(is_closed=True).count()
+        total_ongoing  = pinjaman_tahun.filter(is_process=True, is_closed=False).count()
         context = {
             'menu':'Daftar Pinjaman',
             'id':3,
-            'pinjaman':pinjaman
+            'pinjaman':pinjaman,
+            'tahun':tahun,
+            'total_tahun':total_tahun,
+            'total_selesai':total_selesai,
+            'total_ongoing':total_ongoing,
         }
         return render(request,'views/daftar_pinjam.html',context)
     else:
@@ -552,12 +565,13 @@ def HapusDraftPinjaman(request,id):
             try:
                 pinjaman = HeaderPeminjaman.objects.get(id=id)
                 
-                if pinjaman.is_process != True:
-                    write_log(request.user.username, f"Hapus Draft Peminjaman: {pinjaman.customer} | {pinjaman.tanggal_pinjam}")
+                jumlah_device = DetailPeminjaman.objects.filter(peminjaman=pinjaman).count()
+                if pinjaman.is_process != True or jumlah_device == 0:
+                    write_log(request.user.username, f"Hapus Peminjaman: {pinjaman.customer} | {pinjaman.tanggal_pinjam}")
                     pinjaman.delete()
                     messages.add_message(request,messages.SUCCESS,'Peminjaman berhasil dihapus.')
                 else:
-                    messages.add_message(request,messages.SUCCESS,'Peminjaman gagal dihapus.')
+                    messages.add_message(request,messages.SUCCESS,'Peminjaman gagal dihapus, masih ada device aktif.')
             except:
                 messages.add_message(request,messages.SUCCESS,'Peminjaman gagal dihapus, silakan coba kembali...')
             return redirect('/pinjam/list/')

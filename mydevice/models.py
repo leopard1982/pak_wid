@@ -43,6 +43,7 @@ class MasterCustomer(models.Model):
     alamat = models.CharField(max_length=100)
     telpon = models.CharField(max_length=20)
     kontak_person = models.CharField(max_length=200)
+    catatan = models.TextField(blank=True, null=True)
     slug = models.SlugField(max_length=150)
 
     def __str__(self):

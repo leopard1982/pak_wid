@@ -60,6 +60,10 @@
           <input type="text" name="kontak_person" class="form-control" value="{{customer.kontak_person}}" placeholder="Nama PIC" required>
         </div>
       </div>
+      <div class="mb-3">
+        <label class="form-label">Catatan</label>
+        <textarea name="catatan" class="form-control" rows="3" placeholder="Catatan atau status untuk customer ini...">{{customer.catatan|default:""}}</textarea>
+      </div>
       <div class="mt-4">
         <button type="submit" class="btn btn-primary">
           <i class="fa fa-save"></i> Update Customer </button>

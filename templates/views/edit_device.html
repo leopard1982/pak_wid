@@ -49,12 +49,12 @@
         </div>
         <div class="col-md-6 mb-3">
           <label class="form-label">Nama Device</label>
-          <input type="text" name="nama_device" class="form-control" value="{{ device.nama_device }}" required>
+          <input type="text" name="nama_device" class="form-control" value="{{ device.nama_device }}" placeholder="Contoh: Laptop Dell Latitude 5420" required>
         </div>
       </div>
       <div class="mb-3">
         <label class="form-label">Keterangan</label>
-        <textarea name="keterangan" class="form-control" rows="3" required>{{ device.keterangan }}</textarea>
+        <textarea name="keterangan" class="form-control" rows="3" placeholder="Spesifikasi atau catatan mengenai device" required>{{ device.keterangan }}</textarea>
       </div>
       <div class="mb-3">
         <label class="form-label">Kondisi Device</label>

@@ -468,12 +468,12 @@
       <form method="POST" action="/paswd/">
         {% csrf_token %}
 
-        <div class="modal-header">
+        <div class="modal-header" style="background:#0b3d91;color:white;">
           <h5 class="modal-title">
             <i class="fa fa-key"></i> Ubah Password
           </h5>
 
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
         </div>
 
 
@@ -481,17 +481,17 @@
 
           <div class="mb-3">
             <label class="form-label">Password Lama</label>
-            <input type="password" name="old_password" class="form-control" required>
+            <input type="password" name="old_password" class="form-control" placeholder="Masukkan password lama" required>
           </div>
 
           <div class="mb-3">
             <label class="form-label">Password Baru</label>
-            <input type="password" name="new_password1" class="form-control" required>
+            <input type="password" name="new_password1" class="form-control" placeholder="Minimal 8 karakter" required>
           </div>
 
           <div class="mb-3">
             <label class="form-label">Konfirmasi Password Baru</label>
-            <input type="password" name="new_password2" class="form-control" required>
+            <input type="password" name="new_password2" class="form-control" placeholder="Ulangi password baru" required>
           </div>
 
         </div>

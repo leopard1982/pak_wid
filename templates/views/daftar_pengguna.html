@@ -132,21 +132,29 @@
                 <i class="fa fa-edit"></i>
               </a>
               {% if u.is_active %}
-                <a href="{% url 'toggle_status_pengguna' u.id %}"
-                   class="btn btn-outline-danger btn-sm" title="Nonaktifkan"
-                   onclick="return confirm('Nonaktifkan pengguna {{ u.username }}?')">
+                <button type="button" class="btn btn-outline-danger btn-sm" title="Nonaktifkan"
+                        data-bs-toggle="modal" data-bs-target="#modalKonfirmasi"
+                        data-url="{% url 'toggle_status_pengguna' u.id %}"
+                        data-pesan="Nonaktifkan pengguna <strong>{{ u.username }}</strong>?"
+                        data-color="danger" data-label="Nonaktifkan">
                   <i class="fa fa-ban"></i>
-                </a>
+                </button>
               {% else %}
-                <a href="{% url 'toggle_status_pengguna' u.id %}"
-                   class="btn btn-outline-success btn-sm" title="Aktifkan"
-                   onclick="return confirm('Aktifkan pengguna {{ u.username }}?')">
+                <button type="button" class="btn btn-outline-success btn-sm" title="Aktifkan"
+                        data-bs-toggle="modal" data-bs-target="#modalKonfirmasi"
+                        data-url="{% url 'toggle_status_pengguna' u.id %}"
+                        data-pesan="Aktifkan pengguna <strong>{{ u.username }}</strong>?"
+                        data-color="success" data-label="Aktifkan">
                   <i class="fa fa-check"></i>
-                </a>
+                </button>
               {% endif %}
-              <a href="{% url 'hapus_pengguna' u.id %}" class="btn btn-danger btn-sm" title="Hapus">
+              <button type="button" class="btn btn-danger btn-sm" title="Hapus"
+                      data-bs-toggle="modal" data-bs-target="#modalKonfirmasi"
+                      data-url="{% url 'hapus_pengguna' u.id %}"
+                      data-pesan="Hapus pengguna <strong>{{ u.username }}</strong>? Tindakan ini tidak dapat dibatalkan."
+                      data-color="danger" data-label="Hapus">
                 <i class="fa fa-trash"></i>
-              </a>
+              </button>
             </td>
           
           </tr> {% endfor %} </tbody>
@@ -154,19 +162,56 @@
     </div>
   </div>
 </div>
+<!-- MODAL KONFIRMASI -->
+<div class="modal fade" id="modalKonfirmasi" tabindex="-1">
+  <div class="modal-dialog modal-sm">
+    <div class="modal-content">
+      <div class="modal-header" id="konfirmasiHeader">
+        <h5 class="modal-title"><i class="fa fa-exclamation-triangle"></i> Konfirmasi</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body text-center py-4">
+        <p class="mb-0" id="konfirmasiPesan"></p>
+      </div>
+      <div class="modal-footer justify-content-center">
+        <a href="#" id="konfirmasiYa" class="btn btn-danger">
+          <i class="fa fa-check"></i> <span id="konfirmasiLabel">Ya</span>
+        </a>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          <i class="fa fa-times"></i> Batal
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
 <!-- DATATABLE JS -->
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
 <script>
+var modalKonfirmasi = document.getElementById('modalKonfirmasi');
+if (modalKonfirmasi) {
+  modalKonfirmasi.addEventListener('show.bs.modal', function(e) {
+    var btn = e.relatedTarget;
+    document.getElementById('konfirmasiPesan').innerHTML = btn.dataset.pesan;
+    document.getElementById('konfirmasiYa').href = btn.dataset.url;
+    document.getElementById('konfirmasiLabel').textContent = btn.dataset.label || 'Ya';
+    var color = btn.dataset.color || 'danger';
+    document.getElementById('konfirmasiHeader').className = 'modal-header bg-' + color + ' text-white';
+    document.getElementById('konfirmasiYa').className = 'btn btn-' + color;
+  });
+}
+
 $(document).ready(function(){
   $('#tablePengguna').DataTable({
     pageLength: 10,
     lengthMenu: [5,10,25,50],
     language: {
-      search: "Cari Device:",
+      search: "Cari Pengguna:",
+      searchPlaceholder: "Cari username, nama, role...",
       lengthMenu: "Tampilkan _MENU_ data",
-      info: "Menampilkan _START_ to _END_ of _TOTAL_ Devices",
+      info: "Menampilkan _START_ to _END_ of _TOTAL_ pengguna",
       paginate: {
         previous: "Prev",
         next: "Next"

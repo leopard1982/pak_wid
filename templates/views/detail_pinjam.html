@@ -157,10 +157,13 @@
                 {% else %}
                   {% if user.userprofile.role == 'super' or user.userprofile.role == 'admin' %}
                     {% if not d.tanggal_dikembalikan %}
-                      <a href="/pinjam/kembalikan/{{d.id}}/" class="btn btn-success btn-sm m-1"
-                         onclick="return confirm('Kembalikan device ini?')">
+                      <button type="button" class="btn btn-success btn-sm m-1"
+                              data-bs-toggle="modal" data-bs-target="#modalKonfirmasi"
+                              data-url="/pinjam/kembalikan/{{d.id}}/"
+                              data-pesan="Kembalikan device <strong>{{ d.device.nama_device }}</strong>?"
+                              data-color="success" data-label="Kembalikan">
                         <i class="fa fa-check"></i>
-                      </a>
+                      </button>
                       <button class="btn btn-warning btn-sm m-1" data-bs-toggle="modal"
                         data-bs-target="#modalPerpanjang"
                         data-id="{{ d.id }}"
@@ -230,7 +233,7 @@
           <h5 class="modal-title">
             <i class="fa fa-plus"></i> Tambah Device
           </h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body">
           <div class="row">
@@ -250,12 +253,12 @@
           <div class="row">
             <div class="col-12 mb-3">
               <label class="form-label">Lokasi</label>
-              <input type="text" name="lokasi" class="form-control">
+              <input type="text" name="lokasi" class="form-control" placeholder="Contoh: Kantor Jakarta Selatan">
             </div>            
           </div>
           <div class="mb-3">
             <label class="form-label">Keterangan</label>
-            <textarea name="keterangan" class="form-control"></textarea>
+            <textarea name="keterangan" class="form-control" placeholder="Catatan mengenai penggunaan device"></textarea>
           </div>
         </div>
         <div class="modal-footer">
@@ -268,11 +271,47 @@
   </div>
 </div>
 
+<!-- MODAL KONFIRMASI -->
+<div class="modal fade" id="modalKonfirmasi" tabindex="-1">
+  <div class="modal-dialog modal-sm">
+    <div class="modal-content">
+      <div class="modal-header" id="konfirmasiHeader">
+        <h5 class="modal-title"><i class="fa fa-exclamation-triangle"></i> Konfirmasi</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body text-center py-4">
+        <p class="mb-0" id="konfirmasiPesan"></p>
+      </div>
+      <div class="modal-footer justify-content-center">
+        <a href="#" id="konfirmasiYa" class="btn btn-success">
+          <i class="fa fa-check"></i> <span id="konfirmasiLabel">Ya</span>
+        </a>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          <i class="fa fa-times"></i> Batal
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- BOOTSTRAP JS -->
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
+  var modalKonfirmasi = document.getElementById('modalKonfirmasi');
+  if (modalKonfirmasi) {
+    modalKonfirmasi.addEventListener('show.bs.modal', function(e) {
+      var btn = e.relatedTarget;
+      document.getElementById('konfirmasiPesan').innerHTML = btn.dataset.pesan;
+      document.getElementById('konfirmasiYa').href = btn.dataset.url;
+      document.getElementById('konfirmasiLabel').textContent = btn.dataset.label || 'Ya';
+      var color = btn.dataset.color || 'success';
+      document.getElementById('konfirmasiHeader').className = 'modal-header bg-' + color + ' text-white';
+      document.getElementById('konfirmasiYa').className = 'btn btn-' + color;
+    });
+  }
+
   var modalPerpanjang = document.getElementById('modalPerpanjang');
   if (modalPerpanjang) {
     modalPerpanjang.addEventListener('show.bs.modal', function(e) {
