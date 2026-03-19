@@ -321,13 +321,20 @@
       var tgl = btn.getAttribute('data-tgl');
       document.getElementById('namaDevicePerpanjang').value = device;
       document.getElementById('formPerpanjang').action = '/pinjam/perpanjang/' + id + '/';
-      // Re-init flatpickr for this modal input with minDate
+
+      // Hitung otomatis: 1 tahun dari tanggal akhir saat ini
+      var expDate = new Date(tgl);
+      expDate.setFullYear(expDate.getFullYear() + 1);
+      var newTgl = expDate.toISOString().split('T')[0]; // format Y-m-d
+
+      // Re-init flatpickr dengan defaultDate = +1 tahun dan minDate = expired lama
       var input = document.getElementById('tglAkhirBaru');
       if (input._flatpickr) input._flatpickr.destroy();
       flatpickr(input, {
         dateFormat: 'Y-m-d',
         altInput: true,
         altFormat: 'd/m/Y',
+        defaultDate: newTgl,
         minDate: tgl,
         allowInput: true
       });
