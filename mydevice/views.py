@@ -43,13 +43,21 @@ def Login(request):
         username = request.POST['username']
         password = request.POST['password']
         user = authenticate(username=username,password=password)
-        if (user):
+        if user:
             login(request,user)
             write_log(user.username, f"Login")
             messages.add_message(request,messages.SUCCESS,f"Selamat datang {user.userprofile.nama_lengkap}!")
             return redirect('/')
         else:
-            messages.add_message(request,messages.SUCCESS,f"Username atau Password tidak sesuai. Silakan coba kembali.")
+            # Cek apakah user ada tapi nonaktif
+            try:
+                cek_user = User.objects.get(username=username)
+                if not cek_user.is_active:
+                    messages.add_message(request,messages.SUCCESS,f"Akun Anda dinonaktifkan. Hubungi administrator.")
+                else:
+                    messages.add_message(request,messages.SUCCESS,f"Username atau Password tidak sesuai. Silakan coba kembali.")
+            except User.DoesNotExist:
+                messages.add_message(request,messages.SUCCESS,f"Username atau Password tidak sesuai. Silakan coba kembali.")
             return redirect('/login/')
 
     if request.user.is_authenticated:
@@ -63,7 +71,10 @@ def DaftarPengguna(request):
             context = {
                 'menu':'Daftar Pengguna',
                 'id':5,
-                'users':users
+                'users':users,
+                'total_pengguna': users.count(),
+                'total_aktif': users.filter(is_active=True).count(),
+                'total_nonaktif': users.filter(is_active=False).count(),
             }
             return render(request,'views/daftar_pengguna.html',context)
         else:
@@ -83,7 +94,14 @@ def EditPengguna(request,id):
                     userprofile.nama_lengkap=request.POST['nama']
                     userprofile.role = request.POST['role']
                     userprofile.save()
-                    write_log(request.user.username, f"Edit Pengguna: {user.username}")
+                    status_lama = "Aktif" if user.is_active else "Nonaktif"
+                    user.is_active = request.POST.get('is_active') == 'true'
+                    status_baru = "Aktif" if user.is_active else "Nonaktif"
+                    user.save()
+                    log_msg = f"Edit Pengguna: {user.username}"
+                    if status_lama != status_baru:
+                        log_msg += f" | Status: {status_lama} → {status_baru}"
+                    write_log(request.user.username, log_msg)
                     messages.add_message(request,messages.SUCCESS,'Update Pengguna Berhasil Dilakukan.')
                     return redirect('/user/list/')
             except:
@@ -108,6 +126,25 @@ def EditPengguna(request,id):
     else:
         messages.add_message(request,messages.SUCCESS,"Silakan Login Terlebih Dahulu.")
         return redirect('/')
+
+def ToggleStatusPengguna(request, id):
+    if request.user.is_authenticated:
+        if request.user.userprofile.role == "super":
+            try:
+                user = User.objects.get(id=id)
+                user.is_active = not user.is_active
+                user.save()
+                status = "Aktif" if user.is_active else "Nonaktif"
+                write_log(request.user.username, f"Toggle Status Pengguna: {user.username} → {status}")
+                messages.add_message(request, messages.SUCCESS, f'Status {user.username} berhasil diubah menjadi {status}.')
+            except:
+                messages.add_message(request, messages.SUCCESS, 'Gagal mengubah status pengguna.')
+            return redirect('/user/list/')
+        else:
+            messages.add_message(request, messages.SUCCESS, "Anda tidak memiliki ijin.")
+            return redirect('/')
+    else:
+        return redirect('/login/')
 
 def HapusPengguna(request,id):    
     if request.user.is_authenticated:
@@ -194,7 +231,11 @@ def DaftarDevice(request):
         context = {
             'menu':'Daftar Device',
             'id':1,
-            'device':device
+            'device':device,
+            'total_device': device.count(),
+            'total_available': device.filter(is_ok=True, is_out=False).count(),
+            'total_dipinjam': device.filter(is_out=True).count(),
+            'total_rusak': device.filter(is_ok=False).count(),
         }
         return render(request,'views/daftar_device.html',context)
     else:
@@ -208,9 +249,15 @@ def EditDevice(request,id):
                 device = MasterDevice.objects.get(id=id)
                 device.nama_device = request.POST['nama_device']
                 device.keterangan = request.POST['keterangan']
+                kondisi_lama = "OK" if device.is_ok else "Rusak"
+                device.is_ok = request.POST.get('is_ok') == 'true'
+                kondisi_baru = "OK" if device.is_ok else "Rusak"
                 device.updated_by = request.user.userprofile.nama_lengkap
                 device.save()
-                write_log(request.user.username, f"Edit Device: {device.nama_device}")
+                log_msg = f"Edit Device: {device.nama_device}"
+                if kondisi_lama != kondisi_baru:
+                    log_msg += f" | Kondisi: {kondisi_lama} → {kondisi_baru}"
+                write_log(request.user.username, log_msg)
                 messages.add_message(request,messages.SUCCESS,'Update Device Berhasil Dilakukan.')
                 return redirect('/device/list/')
             try:
@@ -318,16 +365,20 @@ def EditCustomer(request,id):
         messages.add_message(request,messages.SUCCESS,"Silakan Login Terlebih Dahulu.")
         return redirect('/')
 
-def HapusCustomer(request,id):   
+def HapusCustomer(request,id):
     if request.user.is_authenticated:
-        if request.user.userprofile.role == "super" or request.user.userprofile.role == "admin":     
+        if request.user.userprofile.role == "super" or request.user.userprofile.role == "admin":
             try:
                 customer = MasterCustomer.objects.get(id=int(id))
-                write_log(request.user.username, f"Hapus Customer: {customer.nama}")
-                customer.delete()
-                messages.add_message(request,messages.SUCCESS,'Hapus Customer Berhasil.')
+                punya_transaksi = HeaderPeminjaman.objects.filter(customer=customer).exists()
+                if punya_transaksi:
+                    messages.add_message(request,messages.SUCCESS,'Hapus Customer Gagal, customer yang sudah pernah bertransaksi tidak dapat dihapus.')
+                else:
+                    write_log(request.user.username, f"Hapus Customer: {customer.nama}")
+                    customer.delete()
+                    messages.add_message(request,messages.SUCCESS,'Hapus Customer Berhasil.')
             except:
-                messages.add_message(request,messages.SUCCESS,'Hapus Customer Gagal, Customer yang sudah pernah dipinjam tidak bisa dihapus.')
+                messages.add_message(request,messages.SUCCESS,'Hapus Customer Gagal, silakan coba kembali.')
             return redirect('/customer/list/')
         else:
             messages.add_message(request,messages.SUCCESS,"Anda tidak memiliki ijin.")
@@ -339,10 +390,28 @@ def HapusCustomer(request,id):
 def DaftarCustomer(request):
     if request.user.is_authenticated:
         customers = MasterCustomer.objects.all()
+
+        # Customer dengan transaksi aktif (is_process=True, is_closed=False)
+        id_aktif = HeaderPeminjaman.objects.filter(
+            is_process=True, is_closed=False
+        ).values_list('customer_id', flat=True).distinct()
+
+        # Customer yang pernah ada transaksi
+        id_pernah = HeaderPeminjaman.objects.values_list('customer_id', flat=True).distinct()
+
+        total_customer   = customers.count()
+        total_aktif      = customers.filter(id__in=id_aktif).count()
+        total_tidak_aktif = customers.exclude(id__in=id_aktif).filter(id__in=id_pernah).count()
+        total_belum_transaksi = customers.exclude(id__in=id_pernah).count()
+
         context = {
             'menu':'Daftar Customer',
             'id':2,
-            'customers':customers
+            'customers':customers,
+            'total_customer': total_customer,
+            'total_aktif': total_aktif,
+            'total_tidak_aktif': total_tidak_aktif,
+            'total_belum_transaksi': total_belum_transaksi,
         }
         return render(request,'views/daftar_customer.html',context)
     else:
@@ -612,6 +681,96 @@ def ExportLogExcel(request):
             return redirect('/')
     else:
         return redirect('/login/')
+
+def KembalikanDevice(request, id):
+    if request.user.is_authenticated:
+        if request.user.userprofile.role in ['super', 'admin']:
+            try:
+                detail = DetailPeminjaman.objects.select_related('device', 'peminjaman').get(id=id)
+                id_pinjam = detail.peminjaman.id
+                detail.tanggal_dikembalikan = datetime.date.today()
+                detail.save()
+                detail.device.is_out = False
+                detail.device.save()
+                write_log(request.user.username, f"Kembalikan Device: {detail.device.nama_device} | Pinjaman {id_pinjam}")
+                # Cek apakah semua device sudah dikembalikan
+                semua_kembali = not DetailPeminjaman.objects.filter(
+                    peminjaman=detail.peminjaman,
+                    tanggal_dikembalikan__isnull=True
+                ).exists()
+                if semua_kembali:
+                    detail.peminjaman.is_closed = True
+                    detail.peminjaman.save()
+                    write_log(request.user.username, f"Tutup Peminjaman: {detail.peminjaman.customer} | {detail.peminjaman.tanggal_pinjam}")
+                messages.add_message(request, messages.SUCCESS, 'Device berhasil dikembalikan.')
+            except Exception as ex:
+                print(ex)
+                messages.add_message(request, messages.SUCCESS, 'Pengembalian device gagal, silakan coba kembali.')
+            return redirect(f'/pinjam/detail/{id_pinjam}/')
+        else:
+            messages.add_message(request, messages.SUCCESS, "Anda tidak memiliki ijin.")
+            return redirect('/')
+    else:
+        return redirect('/login/')
+
+def PerpanjangDevice(request, id):
+    if request.user.is_authenticated:
+        if request.user.userprofile.role in ['super', 'admin']:
+            if request.method == 'POST':
+                try:
+                    detail = DetailPeminjaman.objects.select_related('device', 'peminjaman').get(id=id)
+                    id_pinjam = detail.peminjaman.id
+                    tgl_baru_str = request.POST['tanggal_akhir_baru']
+                    tgl_baru = datetime.date(
+                        year=int(tgl_baru_str.split('-')[0]),
+                        month=int(tgl_baru_str.split('-')[1]),
+                        day=int(tgl_baru_str.split('-')[2])
+                    )
+                    detail.tanggal_akhir = tgl_baru
+                    detail.save()
+                    write_log(request.user.username, f"Perpanjang Device: {detail.device.nama_device} | s/d {tgl_baru}")
+                    messages.add_message(request, messages.SUCCESS, f'Perpanjangan device berhasil hingga {tgl_baru.strftime("%d/%m/%Y")}.')
+                except Exception as ex:
+                    print(ex)
+                    messages.add_message(request, messages.SUCCESS, 'Perpanjangan device gagal, silakan coba kembali.')
+                return redirect(f'/pinjam/detail/{id_pinjam}/')
+        else:
+            messages.add_message(request, messages.SUCCESS, "Anda tidak memiliki ijin.")
+            return redirect('/')
+    else:
+        return redirect('/login/')
+
+def GetNotifikasi(request):
+    from django.http import JsonResponse
+    if request.user.is_authenticated:
+        hari_ini = datetime.date.today()
+        batas = hari_ini + datetime.timedelta(days=30)
+        items = DetailPeminjaman.objects.select_related('device', 'peminjaman__customer').filter(
+            tanggal_dikembalikan__isnull=True,
+            peminjaman__is_process=True,
+            peminjaman__is_closed=False,
+            tanggal_akhir__lte=batas
+        ).order_by('tanggal_akhir')
+        data = []
+        for item in items:
+            selisih = (item.tanggal_akhir - hari_ini).days
+            if selisih < 0:
+                status = 'overdue'
+            elif selisih <= 7:
+                status = 'urgent'
+            else:
+                status = 'warning'
+            data.append({
+                'id': item.id,
+                'device': item.device.nama_device,
+                'customer': str(item.peminjaman.customer),
+                'tanggal_akhir': item.tanggal_akhir.strftime('%d/%m/%Y'),
+                'selisih': selisih,
+                'id_pinjam': str(item.peminjaman.id),
+                'status': status,
+            })
+        return JsonResponse({'count': len(data), 'items': data})
+    return JsonResponse({'count': 0, 'items': []})
 
 def Logout(request):
     write_log(request.user.username, f"Logout")

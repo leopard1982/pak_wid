@@ -327,6 +327,29 @@
           <i class="fa fa-server"></i>
           <b>{{menu}}</b>
         </h5>
+        <div class="d-flex align-items-center gap-3">
+        <!-- BELL NOTIFICATION -->
+        <div class="dropdown" id="bellDropdown">
+          <a href="#" class="position-relative text-dark d-flex align-items-center justify-content-center"
+             style="width:36px;height:36px;background:#f0f4fa;border-radius:50%;"
+             data-bs-toggle="dropdown" id="bellBtn" onclick="loadNotifikasi()">
+            <i class="fa fa-bell" style="font-size:16px;"></i>
+            <span class="position-absolute d-none" id="bellBadge"
+              style="top:-4px;right:-4px;background:#e74c3c;color:white;font-size:10px;font-weight:700;
+                     min-width:18px;height:18px;border-radius:9px;display:flex!important;
+                     align-items:center;justify-content:center;padding:0 4px;line-height:1;border:2px solid white;"></span>
+          </a>
+          <ul class="dropdown-menu dropdown-menu-end shadow border-0 p-0" id="bellMenu" style="min-width:320px;max-height:400px;overflow-y:auto;">
+            <li class="px-3 py-2 border-bottom d-flex justify-content-between align-items-center">
+              <strong style="font-size:13px;"><i class="fa fa-bell text-warning"></i> Notifikasi Jatuh Tempo</strong>
+              <span id="bellCountLabel" class="badge bg-danger d-none" style="font-size:11px;"></span>
+            </li>
+            <li id="bellContent">
+              <div class="text-center text-muted py-3" style="font-size:13px;">Memuat...</div>
+            </li>
+          </ul>
+        </div>
+
         <div class="dropdown">
           <a href="#" class="d-flex align-items-center gap-2 text-decoration-none text-dark dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
             <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center text-white fw-bold"
@@ -364,6 +387,7 @@
             </li>
           </ul>
         </div>
+        </div><!-- end d-flex wrapper -->
       </div>
       <div class="main-content">
         <!-- BREADCRUMB -->
@@ -491,5 +515,48 @@
 
   </div>
 </div>
+  <script>
+  function loadNotifikasi() {
+    fetch('/notifikasi/')
+      .then(r => r.json())
+      .then(data => {
+        var badge = document.getElementById('bellBadge');
+        var countLabel = document.getElementById('bellCountLabel');
+        var content = document.getElementById('bellContent');
+        if (data.count > 0) {
+          badge.textContent = data.count;
+          badge.style.display = 'flex';
+          badge.classList.remove('d-none');
+          countLabel.textContent = data.count + ' notifikasi';
+          countLabel.classList.remove('d-none');
+        } else {
+          badge.style.display = 'none';
+          badge.classList.add('d-none');
+          countLabel.classList.add('d-none');
+        }
+        if (data.items.length === 0) {
+          content.innerHTML = '<div class="text-center text-muted py-3" style="font-size:13px;"><i class="fa fa-check-circle text-success"></i> Tidak ada device jatuh tempo</div>';
+          return;
+        }
+        var html = '';
+        data.items.forEach(function(item) {
+          var color = item.status === 'overdue' ? '#dc3545' : item.status === 'urgent' ? '#fd7e14' : '#ffc107';
+          var label = item.status === 'overdue' ? 'Terlambat ' + Math.abs(item.selisih) + ' hari' : item.selisih + ' hari lagi';
+          html += '<li><a href="/pinjam/detail/' + item.id_pinjam + '/" class="dropdown-item py-2 border-bottom" style="white-space:normal;">' +
+            '<div class="d-flex justify-content-between align-items-start">' +
+            '<div><div style="font-size:12px;font-weight:600;">' + item.device + '</div>' +
+            '<div style="font-size:11px;color:#666;">' + item.customer + '</div>' +
+            '<div style="font-size:11px;color:#888;">Jatuh tempo: ' + item.tanggal_akhir + '</div></div>' +
+            '<span class="badge ms-2 mt-1" style="background:' + color + ';font-size:10px;white-space:nowrap;">' + label + '</span>' +
+            '</div></a></li>';
+        });
+        content.innerHTML = html;
+      });
+  }
+
+  // Load on page ready & auto-refresh every 5 minutes
+  document.addEventListener('DOMContentLoaded', loadNotifikasi);
+  setInterval(loadNotifikasi, 300000);
+</script>
   </body>
 </html>

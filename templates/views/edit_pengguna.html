@@ -163,6 +163,24 @@
 
 
 
+      <div class="mb-3">
+        <label class="form-label">Status Akun</label>
+        <div class="d-flex gap-3 mt-1">
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="is_active" id="statusAktif" value="true" {% if usernya.is_active %}checked{% endif %}>
+            <label class="form-check-label text-success fw-semibold" for="statusAktif">
+              <i class="fa fa-check-circle"></i> Aktif
+            </label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="is_active" id="statusNonaktif" value="false" {% if not usernya.is_active %}checked{% endif %}>
+            <label class="form-check-label text-danger fw-semibold" for="statusNonaktif">
+              <i class="fa fa-ban"></i> Nonaktif
+            </label>
+          </div>
+        </div>
+      </div>
+
       <div class="mt-4">
 
         <button type="submit" class="btn btn-primary">

@@ -4,7 +4,8 @@ from .views import Dashboard, Login, TambahPengguna, TambahDevice, TambahCustome
 from .views import DetailPinjam,DaftarDevice, DaftarCustomer,DaftarPengguna,DaftarPinjam
 from .views import EditDevice, HapusDevice,Logout, EditPengguna, HapusPengguna, EditCustomer
 from .views import HapusCustomer, HapusItemDevice, ProsesPinjaman, HapusDraftPinjaman,Ubahpassword
-from .views import DaftarLog, ExportLogExcel
+from .views import DaftarLog, ExportLogExcel, ToggleStatusPengguna
+from .views import KembalikanDevice, PerpanjangDevice, GetNotifikasi
 
 
 urlpatterns = [
@@ -14,6 +15,7 @@ urlpatterns = [
     path('user/add/', TambahPengguna, name="tambah_pengguna"),
     path('user/edit/<str:id>/', EditPengguna, name="edit_pengguna"),
     path('user/del/<str:id>/', HapusPengguna, name="hapus_pengguna"),
+    path('user/toggle/<str:id>/', ToggleStatusPengguna, name="toggle_status_pengguna"),
     path('user/list/', DaftarPengguna, name="daftar_pengguna"),
     path('device/add/', TambahDevice, name="tambah_device"),
     path('device/edit/<str:id>/', EditDevice, name="edit_device"),
@@ -32,4 +34,7 @@ urlpatterns = [
     path('logout/',Logout,name="logout"),
     path('log/list/', DaftarLog, name="daftar_log"),
     path('log/export/', ExportLogExcel, name="export_log"),
+    path('pinjam/kembalikan/<str:id>/', KembalikanDevice, name="kembalikan_device"),
+    path('pinjam/perpanjang/<str:id>/', PerpanjangDevice, name="perpanjang_device"),
+    path('notifikasi/', GetNotifikasi, name="get_notifikasi"),
 ]

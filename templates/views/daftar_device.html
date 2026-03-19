@@ -41,6 +41,23 @@
     padding: 6px 10px;
   }
 
+  /* CARD STAT */
+  .card-stat {
+    border: none;
+    border-radius: 14px;
+    color: white;
+    overflow: hidden;
+    transition: transform 0.2s ease;
+  }
+  .card-stat:hover { transform: translateY(-2px); }
+  .card-stat h6 { font-size: 13px; font-weight: 600; opacity: 0.9; }
+  .card-stat h3 { font-size: 28px; font-weight: bold; margin-top: 6px; margin-bottom: 0; }
+  .card-stat i  { font-size: 20px; margin-right: 6px; }
+  .cs-total     { background: linear-gradient(135deg, #1a3a6e 0%, #2471a3 60%, #5dade2 100%); box-shadow: 0 8px 20px rgba(26,58,110,0.28); }
+  .cs-available { background: linear-gradient(135deg, #145a32 0%, #1e8449 60%, #52be80 100%); box-shadow: 0 8px 20px rgba(20,90,50,0.28); }
+  .cs-dipinjam  { background: linear-gradient(135deg, #6e3b00 0%, #d68910 60%, #f8c471 100%); box-shadow: 0 8px 20px rgba(110,59,0,0.28); }
+  .cs-rusak     { background: linear-gradient(135deg, #641e16 0%, #cb4335 60%, #f1948a 100%); box-shadow: 0 8px 20px rgba(100,30,22,0.28); }
+
   /* MOBILE */
   @media(max-width:768px) {
     .main {
@@ -53,6 +70,34 @@
 
 
 {% block contents %}
+<!-- SUMMARY CARDS -->
+<div class="row mb-4">
+  <div class="col-6 col-md-3 mb-3">
+    <div class="card card-stat cs-total p-3">
+      <h6><i class="fa fa-desktop"></i> Total Device</h6>
+      <h3>{{ total_device }}</h3>
+    </div>
+  </div>
+  <div class="col-6 col-md-3 mb-3">
+    <div class="card card-stat cs-available p-3">
+      <h6><i class="fa fa-check-circle"></i> Available</h6>
+      <h3>{{ total_available }}</h3>
+    </div>
+  </div>
+  <div class="col-6 col-md-3 mb-3">
+    <div class="card card-stat cs-dipinjam p-3">
+      <h6><i class="fa fa-share"></i> Dipinjam</h6>
+      <h3>{{ total_dipinjam }}</h3>
+    </div>
+  </div>
+  <div class="col-6 col-md-3 mb-3">
+    <div class="card card-stat cs-rusak p-3">
+      <h6><i class="fa fa-times-circle"></i> Rusak</h6>
+      <h3>{{ total_rusak }}</h3>
+    </div>
+  </div>
+</div>
+
 <div class="card form-card shadow-sm">
   <div class="card-header d-flex justify-content-between align-items-center">
     <h6 class="mb-0">

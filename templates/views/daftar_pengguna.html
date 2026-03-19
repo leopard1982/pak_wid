@@ -41,6 +41,22 @@
     padding: 6px 10px;
   }
 
+  /* CARD STAT */
+  .card-stat {
+    border: none;
+    border-radius: 14px;
+    color: white;
+    overflow: hidden;
+    transition: transform 0.2s ease;
+  }
+  .card-stat:hover { transform: translateY(-2px); }
+  .card-stat h6  { font-size: 13px; font-weight: 600; opacity: 0.9; }
+  .card-stat h3  { font-size: 28px; font-weight: bold; margin-top: 6px; margin-bottom: 0; }
+  .card-stat i   { font-size: 20px; margin-right: 6px; }
+  .cs-total    { background: linear-gradient(135deg, #1a3a6e 0%, #2471a3 60%, #5dade2 100%); box-shadow: 0 8px 20px rgba(26,58,110,0.28); }
+  .cs-aktif    { background: linear-gradient(135deg, #145a32 0%, #1e8449 60%, #52be80 100%); box-shadow: 0 8px 20px rgba(20,90,50,0.28); }
+  .cs-nonaktif { background: linear-gradient(135deg, #641e16 0%, #cb4335 60%, #f1948a 100%); box-shadow: 0 8px 20px rgba(100,30,22,0.28); }
+
   /* MOBILE */
   @media(max-width:768px) {
     .main {
@@ -53,6 +69,28 @@
 
 
 {% block contents %}
+<!-- SUMMARY CARDS -->
+<div class="row mb-4">
+  <div class="col-12 col-md-4 mb-3">
+    <div class="card card-stat cs-total p-3">
+      <h6><i class="fa fa-users"></i> Total Pengguna</h6>
+      <h3>{{ total_pengguna }}</h3>
+    </div>
+  </div>
+  <div class="col-12 col-md-4 mb-3">
+    <div class="card card-stat cs-aktif p-3">
+      <h6><i class="fa fa-check-circle"></i> Pengguna Aktif</h6>
+      <h3>{{ total_aktif }}</h3>
+    </div>
+  </div>
+  <div class="col-12 col-md-4 mb-3">
+    <div class="card card-stat cs-nonaktif p-3">
+      <h6><i class="fa fa-ban"></i> Pengguna Nonaktif</h6>
+      <h3>{{ total_nonaktif }}</h3>
+    </div>
+  </div>
+</div>
+
 <div class="card form-card shadow-sm">
   <div class="card-header d-flex justify-content-between align-items-center">
     <h6 class="mb-0">
@@ -70,7 +108,8 @@
             <th>Username</th>
             <th>Nama Lengkap</th>
             <th>Role</th>
-            <th width="120">Action</th>
+            <th width="100">Status</th>
+            <th width="140">Action</th>
           </tr>
         </thead>
         <tbody> {% for u in users %} <tr>
@@ -78,14 +117,34 @@
             <td>{{ u.username }}</td>
             <td>{{ u.userprofile.nama_lengkap }}</td>
             <td> {% if u.userprofile.role == "super" %} <span class="badge bg-danger badge-role">
-                <i class="fa fa-star"></i> Super </span> {% elif u.userprofile.role == "admin" %} <span class="badge bg-primary badge-role">
-                <i class="fa fa-user"></i> Admin </span> {% else %} <span class="badge bg-secondary badge-role">
-                <i class="fa fa-eye"></i> Viewer </span> {% endif %} </td>
+                <i class="fa fa-star"></i> Super Admin </span> {% elif u.userprofile.role == "admin" %} <span class="badge bg-primary badge-role">
+                <i class="fa fa-user"></i> Administrator </span> {% else %} <span class="badge bg-secondary badge-role">
+                <i class="fa fa-eye"></i> Pengguna </span> {% endif %} </td>
             <td>
-              <a href="{% url 'edit_pengguna' u.id %}" class="btn btn-warning btn-sm m-1">
+              {% if u.is_active %}
+                <span class="badge bg-success" style="font-size:12px;padding:5px 9px;"><i class="fa fa-check"></i> Aktif</span>
+              {% else %}
+                <span class="badge bg-danger" style="font-size:12px;padding:5px 9px;"><i class="fa fa-ban"></i> Nonaktif</span>
+              {% endif %}
+            </td>
+            <td style="white-space:nowrap;">
+              <a href="{% url 'edit_pengguna' u.id %}" class="btn btn-warning btn-sm" title="Edit">
                 <i class="fa fa-edit"></i>
               </a>
-              <a href="{% url 'hapus_pengguna' u.id %}" class="btn btn-danger btn-sm m-1">
+              {% if u.is_active %}
+                <a href="{% url 'toggle_status_pengguna' u.id %}"
+                   class="btn btn-outline-danger btn-sm" title="Nonaktifkan"
+                   onclick="return confirm('Nonaktifkan pengguna {{ u.username }}?')">
+                  <i class="fa fa-ban"></i>
+                </a>
+              {% else %}
+                <a href="{% url 'toggle_status_pengguna' u.id %}"
+                   class="btn btn-outline-success btn-sm" title="Aktifkan"
+                   onclick="return confirm('Aktifkan pengguna {{ u.username }}?')">
+                  <i class="fa fa-check"></i>
+                </a>
+              {% endif %}
+              <a href="{% url 'hapus_pengguna' u.id %}" class="btn btn-danger btn-sm" title="Hapus">
                 <i class="fa fa-trash"></i>
               </a>
             </td>

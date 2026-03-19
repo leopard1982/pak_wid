@@ -56,6 +56,23 @@
         <label class="form-label">Keterangan</label>
         <textarea name="keterangan" class="form-control" rows="3" required>{{ device.keterangan }}</textarea>
       </div>
+      <div class="mb-3">
+        <label class="form-label">Kondisi Device</label>
+        <div class="d-flex gap-3 mt-1">
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="is_ok" id="kondisiOk" value="true" {% if device.is_ok %}checked{% endif %}>
+            <label class="form-check-label text-success fw-semibold" for="kondisiOk">
+              <i class="fa fa-check-circle"></i> OK
+            </label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="is_ok" id="kondisiRusak" value="false" {% if not device.is_ok %}checked{% endif %}>
+            <label class="form-check-label text-danger fw-semibold" for="kondisiRusak">
+              <i class="fa fa-times-circle"></i> Rusak
+            </label>
+          </div>
+        </div>
+      </div>
       <div class="mt-4">
         <button type="submit" class="btn btn-primary">
           <i class="fa fa-save"></i> Update Device </button>
